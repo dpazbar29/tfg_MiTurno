@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Servicio extends Model
+{
+    use HasFactory;
+
+    protected $table = 'servicios';
+
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'duracion_minutos',
+        'precio',
+        'activo',
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
+        'precio' => 'decimal:2',
+    ];
+}
