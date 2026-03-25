@@ -34,4 +34,9 @@ class Empleado extends Model
     {
         return $this->hasMany(Horario::class, 'empleado_id');
     }
+
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class, 'empleado_id');
+    }
 }

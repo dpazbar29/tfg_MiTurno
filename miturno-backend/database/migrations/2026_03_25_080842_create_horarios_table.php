@@ -23,6 +23,7 @@ return new class extends Migration
 
             $table->timestamps(); // created_at, updated_at
 
+            // FK
             $table->foreign('empleado_id')->references('id')->on('empleados')->onDelete('cascade');
         });
     }

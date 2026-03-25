@@ -23,4 +23,9 @@ class Servicio extends Model
         'activo' => 'boolean',
         'precio' => 'decimal:2',
     ];
+
+    public function reservas()
+    {
+        return $this->hasMany(Reserva::class, 'servicio_id');
+    }
 }
