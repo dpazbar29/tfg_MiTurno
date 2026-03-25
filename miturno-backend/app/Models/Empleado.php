@@ -28,4 +28,10 @@ class Empleado extends Model
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
+
+    // Relación 1-N con Horarios
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class, 'empleado_id');
+    }
 }
