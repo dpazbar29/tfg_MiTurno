@@ -39,4 +39,9 @@ class Empleado extends Model
     {
         return $this->hasMany(Reserva::class, 'empleado_id');
     }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'empleado_id');
+    }
 }

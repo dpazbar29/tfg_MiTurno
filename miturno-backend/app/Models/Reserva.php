@@ -39,4 +39,9 @@ class Reserva extends Model
     {
         return $this->belongsTo(Servicio::class, 'servicio_id');
     }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificaciones::class, 'reserva_id');
+    }
 }

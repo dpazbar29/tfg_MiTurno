@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ServicioController;
 use App\Http\Controllers\Api\EmpleadoController;
 use App\Http\Controllers\Api\HorarioController;
 use App\Http\Controllers\Api\ReservaController;
+use App\Http\Controllers\Api\NotificacionController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -26,3 +27,6 @@ Route::apiResource('horarios', HorarioController::class);
 
 // Rutas API para RESERVA
 Route::apiResource('reservas', ReservaController::class);
+
+// Rutas API para NITIFICACIONES
+Route::apiResource('notificaciones', NotificacionController::class);

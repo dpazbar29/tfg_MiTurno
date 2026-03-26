@@ -1,0 +1,41 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('notificacions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+
+            $table->unsignedBigInteger('reserva_id');
+            $table->unsignedBigInteger('usuario_id');
+            $table->unsignedBigInteger('empleado_id')->nullable();
+
+            $table->enum('tipo', ['confirmacion', 'recordatorio']);
+            $table->boolean('enviado')->default(false);
+
+            $table->timestamps();
+
+            // FK
+            $table->foreign('reserva_id')->references('id')->on('reservas')->onDelete('cascade');
+            $table->foreign('usuario_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('empleado_id')->references('id')->on('empleados')->onDelete('set null');
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('notificacions');
+    }
+};

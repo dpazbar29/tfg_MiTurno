@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Reserva::class, 'usuario_id');
     }
+
+    public function notificaciones()
+    {
+        return $this->hasMany(Notificacion::class, 'usuario_id');
+    }
 }
