@@ -34,3 +34,30 @@ Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
     Route::apiResource('reservas', ReservaController::class)->except(['index', 'store', 'show']);
     Route::apiResource('notificaciones', NotificacionController::class)->except(['index', 'show']);
 });
+
+/*
+
+RUTAS PARA PROBAR LA API
+
+Route::get('/ping', function () {
+    return response()->json(['message' => 'API OK']);
+});
+
+// Rutas API para USUARIOS
+Route::apiResource('usuarios', UsuarioController::class);
+
+// Rutas API para SERVICIOS
+Route::apiResource('servicios', ServicioController::class);
+
+// Rutas API para EMPLEADOS
+Route::apiResource('empleados', EmpleadoController::class);
+
+// Rutas API para HORARIOS
+Route::apiResource('horarios', HorarioController::class);
+
+// Rutas API para RESERVAS
+Route::apiResource('reservas', ReservaController::class);
+
+// Rutas API para NOTIFICACIONES
+Route::apiResource('notificaciones', NotificacionController::class);
+*/

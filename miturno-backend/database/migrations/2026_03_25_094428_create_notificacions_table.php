@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notificacions', function (Blueprint $table) {
+        Schema::create('notificaciones', function (Blueprint $table) {
             $table->bigIncrements('id');
 
             $table->unsignedBigInteger('reserva_id');
@@ -36,6 +36,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notificacions');
+        Schema::dropIfExists('notificaciones');
     }
 };

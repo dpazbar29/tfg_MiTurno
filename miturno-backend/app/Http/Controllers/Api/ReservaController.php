@@ -22,7 +22,7 @@ class ReservaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'usuario_id' => 'required|exists:user,id',
+            'usuario_id' => 'required|exists:users,id',
             'empleado_id' => 'nullable|exists:empleados,id',
             'servicio_id' => 'required|exists:servicios,id',
             'fecha_hora_inicio' => 'required|date|after:now',
