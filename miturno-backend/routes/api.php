@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // CLIENTES pueden ver/crear sus reservas y notificaciones
     Route::apiResource('reservas', ReservaController::class)->only(['index', 'store', 'show']);
+    Route::get('disponibilidad', [ReservaController::class, 'disponibilidad']);
     Route::apiResource('notificaciones', NotificacionController::class)->only(['index', 'show']);
 });
 

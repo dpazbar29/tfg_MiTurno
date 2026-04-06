@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Reserva;
 use App\Models\Servicio;
 use App\Models\Horario;
+use App\Models\Empleado;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 
 class ReservaController extends Controller
@@ -187,5 +189,79 @@ class ReservaController extends Controller
         $reserva->delete();
         
         return response()->json(null, 204);
+    }
+
+    public function disponibilidad(Request $request)
+    {
+        $data = $request->validate([
+            'empleado_id' => 'required|exists:empleados,id',
+            'servicio_id' => 'required|exists:servicios,id',
+            'fecha' => 'required|date',
+        ]);
+
+        $servicio = Servicio::findOrFail($data['servicio_id']);
+        $duracion = $servicio->duracion_minutos;
+
+        $fecha = Carbon::parse($data['fecha']);
+        $diaSemana = $fecha->dayOfWeek;
+
+        $horarios = Horario::where('empleado_id', $data['empleado_id'])
+            ->where('dia_semana', $diaSemana)
+            ->where('activo', true)
+            ->where('tipo', 'normal')
+            ->orderBy('hora_inicio')
+            ->get();
+        
+        if ($horarios->isEmpty()) {
+            return response()->json([
+                'fecha' => $fecha->toDateString(),
+                'empleado_id' => (int) $data['empleado_id'],
+                'servicio_id' => (int) $data['servicio_id'],
+                'slots_disponibles' => [],
+                'message' => 'El empleado no tiene horario disponible ese día.'
+            ]);
+        }
+
+        $reservas = Reserva::with('servicio')
+            ->where('empleado_id', $data['empleado_id'])
+            ->whereDate('fecha_hora_inicio', $fecha->toDateString())
+            ->whereIn('estado', ['pendiente', 'confirmada'])
+            ->get();
+        
+        $slotsDisponibles = [];
+
+        foreach ($horarios as $horario) {
+            $inicioBloque = Carbon::parse($fecha->toDateString() . ' ' . $horario->hora_inicio);
+            $finBloque = Carbon::parse($fecha->toDateString() . ' ' . $horario->hora_fin);
+
+            $slot = $inicioBloque->copy();
+
+            while ($slot->copy()->addMinutes($duracion) <= $finBloque) {
+                
+                $slotFin = $slot->copy()->addMinutes($duracion);
+
+                $solapa = $reservas->contains(function ($reserva) use ($slot, $slotFin) {
+
+                    $inicioExistente = Carbon::parse($reserva->fecha_hora_inicio);
+                    $finExistente = $inicioExistente->copy()->addMinutes($reserva->servicio->duracion_minutos);
+
+                    return $slot < $finExistente && $slotFin > $inicioExistente;
+                });
+
+                if (! $solapa) {
+                    $slotsDisponibles[] = $slot->format('H:i');
+                }
+
+                $slot->addMinutes(30);
+            }
+        }
+
+        return response()->json([
+            'fecha' => $fecha->toDateString(),
+            'empleado_id' => (int) $data['empleado_id'],
+            'servicio_id' => (int) $data['servicio_id'],
+            'duracion_minutos' => $duracion,
+            'slots_disponibles' => $slotsDisponibles,
+        ]);
     }
 }
