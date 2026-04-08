@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\NotificacionController;
 
 // AUTH PÚBLICO
 Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
 
 // AUTH PROTEGIDO
 Route::middleware('auth:sanctum')->group(function () {
