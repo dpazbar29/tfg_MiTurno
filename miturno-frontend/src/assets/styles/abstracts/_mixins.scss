@@ -1,0 +1,13 @@
+@mixin focus-ring {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@mixin input-base {
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: #fff;
+  color: var(--color-text);
+}

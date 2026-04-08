@@ -1,0 +1,19 @@
+body {
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+a,
+button,
+input {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
