@@ -18,6 +18,8 @@ Route::post('register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
+
+    Route::get('catalogo-servicios', [ServicioController::class, 'catalogo']);
     
     // CLIENTES pueden ver/crear sus reservas y notificaciones
     Route::apiResource('reservas', ReservaController::class)->only(['index', 'store', 'show']);

@@ -69,4 +69,9 @@ class ServicioController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function catalogo()
+    {
+        return Servicio::where('activo', true)->get();
+    }
 }

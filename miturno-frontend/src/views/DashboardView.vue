@@ -9,6 +9,10 @@ const logout = async () => {
     await auth.logout()
     router.push('/login')
 }
+
+const irAServicios = () => {
+    router.push('/servicios')
+}
 </script>
 
 <template>
@@ -23,6 +27,7 @@ const logout = async () => {
             Rol: {{ auth.user.rol }}
         </p>
 
+        <button @click="irAServicios">Ver Servicios</button>
         <button @click="logout">Cerrar sesión</button>
     </section>
 </template>
