@@ -74,4 +74,18 @@ class ServicioController extends Controller
     {
         return Servicio::where('activo', true)->get();
     }
+
+    public function empleados(Servicio $servicio)
+    {
+        $empleados = $servicio->empleados()
+            ->whereHas('usuario', fn($q) => $q->where('activo', true))
+            ->with('usuario:id,nombre,apellidos')
+            ->get()
+            ->map(fn($e) => [
+                'id' => $e->id,
+                'nombre' => $e->usuario->nombre . ' ' . $e->usuario->apellidos
+            ]);
+
+        return response()->json($empleados);
+    }
 }

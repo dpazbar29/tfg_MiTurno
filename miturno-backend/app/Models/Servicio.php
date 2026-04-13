@@ -28,4 +28,9 @@ class Servicio extends Model
     {
         return $this->hasMany(Reserva::class, 'servicio_id');
     }
+
+    public function empleados()
+    {
+        return $this->belongsToMany(Empleado::class, 'empleado_servicio', 'servicio_id', 'empleado_id');
+    }
 }

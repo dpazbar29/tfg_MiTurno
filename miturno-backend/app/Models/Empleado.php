@@ -44,4 +44,9 @@ class Empleado extends Model
     {
         return $this->hasMany(Notificacion::class, 'empleado_id');
     }
+
+    public function servicios()
+    {
+        return $this->belongsToMany(Servicio::class, 'empleado_servicio', 'empleado_id', 'servicio_id');
+    }
 }
