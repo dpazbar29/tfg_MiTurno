@@ -9,3 +9,8 @@ export const crearReserva = async (payload) => {
     const { data } = await api.post('/reservas', payload)
     return data
 }
+
+export const getReservas = async () => {
+    const { data } = await api.get('/reservas')
+    return data
+}

@@ -16,9 +16,19 @@ class ReservaController extends Controller
     /**
      * Obtener todas las reservas.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Reserva::with(['usuario', 'empleado.usuario', 'servicio'])->get();
+        $user = $request->user();
+
+        $reservas = \App\Models\Reserva::with([
+            'servicio:id,nombre,duracion_minutos,precio',
+            'empleado.usuario:id,nombre,apellidos',
+        ])
+        ->where('usuario_id', $user->id)
+        ->orderBy('fecha_hora_inicio', 'asc')
+        ->get();
+
+        return response()->json($reservas);
     }
 
     /**

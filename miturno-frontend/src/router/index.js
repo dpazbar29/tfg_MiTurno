@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import ServiciosView from '../views/ServiciosView.vue'
 import NuevaReservaView from '../views/NuevaReservaView.vue'
+import MisReservasView from '../views/MisReservasView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -15,6 +16,7 @@ const router = createRouter({
     { path: '/dashboard', name: 'dashboard', component: DashboardView, meta: { requiresAuth: true } },
     { path: '/servicios', name: 'servicios', component: ServiciosView, meta: { requiresAuth: true } },
     { path: '/reservas/nueva', name: 'nueva-reserva', component: NuevaReservaView, meta: { requiresAuth: true } },
+    { path: '/mis-reservas', name: 'mis-reservas', component: MisReservasView, meta: {requiresAuth: true } },
   ],
 })
 
