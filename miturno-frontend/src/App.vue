@@ -8,7 +8,8 @@
       <RouterLink to="/login">Login</RouterLink> |
       <RouterLink to="/dashboard">Dashboard</RouterLink> |
       <RouterLink to="/mis-reservas">Reservas</RouterLink> |
-      <RouterLink to="/reservas/nueva">Nueva Reserva</RouterLink>
+      <RouterLink to="/reservas/nueva">Nueva Reserva</RouterLink> |
+      <RouterLink to="/admin/servicios">Admin</RouterLink>
     </nav>
 
     <main>
