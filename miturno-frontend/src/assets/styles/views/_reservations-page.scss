@@ -155,6 +155,50 @@
     color: var(--color-text-muted);
   }
 
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: auto;
+    padding-top: var(--space-2);
+  }
+
+  &__cancel {
+    min-width: 8rem;
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--color-error);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  &__cancel:hover:not(:disabled) {
+    background-color: var(--color-error-bg);
+  }
+
+  &__cancel:active:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-error) 16%, white);
+  }
+
+  &__cancel:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__cancel:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
   time {
     color: inherit;
   }

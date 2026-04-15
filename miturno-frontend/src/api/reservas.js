@@ -14,3 +14,8 @@ export const getReservas = async () => {
     const { data } = await api.get('/reservas')
     return data
 }
+
+export const cancelarReserva = async (reservaId) => {
+    const { data } = await api.patch(`/reservas/${reservaId}/cancelar`)
+    return data
+}

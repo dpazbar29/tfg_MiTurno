@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('catalogo-servicios', [ServicioController::class, 'catalogo']);
     Route::get('servicios/{servicio}/empleados', [ServicioController::class, 'empleados']);
+    Route::patch('reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar']);
     
     // CLIENTES pueden ver/crear sus reservas y notificaciones
     Route::apiResource('reservas', ReservaController::class)->only(['index', 'store', 'show']);

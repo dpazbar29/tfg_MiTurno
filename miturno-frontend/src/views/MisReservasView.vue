@@ -1,10 +1,22 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { getReservas } from '../api/reservas'
+import { getReservas, cancelarReserva } from '../api/reservas'
 
 const reservas = ref([])
 const loading = ref(false)
 const error = ref(null)
+
+const cancelarReservaLocal = async (reservaId, reservaNombre) => {
+    if (!confirm(`¿Seguro que quieres cancelar "${reservaNombre}"?`)) return
+
+    try {
+        await cancelarReserva(reservaId)
+        await cargarReservas()
+    } catch (err) {
+        console.error(err.response?.data || err)
+        alert('Error al cancelar la reserva')
+    }
+ }
 
 const cargarReservas = async () => {
     loading.value = true
@@ -130,6 +142,17 @@ onMounted(cargarReservas)
                             <p v-if="reserva.notas" class="reservation-card__notes">
                                 {{ reserva.notas }}
                             </p>
+
+                            <div class="reservation-card__actions">
+                                <button
+                                    v-if="reserva.estado === 'pendiente' && new Date(reserva.fecha_hora_inicio) > new Date()"
+                                    class="reservation-card__cancel"
+                                    @click="cancelarReservaLocal(reserva.id, reserva.servicio?.nombre)"
+                                    :aria-label="`Cancelar reserva ${reserva.servicio?.nombre}`"
+                                >
+                                    Cancelar
+                                </button>
+                            </div>
                         </article>
                     </div>
 

@@ -274,4 +274,18 @@ class ReservaController extends Controller
             'slots_disponibles' => $slotsDisponibles,
         ]);
     }
+
+    public function cancelar(Request $request, Reserva $reserva)
+    {
+        $user = $request->user();
+
+        if ($reserva->usuario_id !== $user->id) {
+            return response()->json(['error' => 'No autorizado'], 403);
+        }
+
+        $reserva->estado = 'cancelada';
+        $reserva->save();
+
+        return response()->json(['message' => 'Reserva cancelada']);
+    }
 }
