@@ -1,16 +1,11 @@
 <script setup>
-  import { RouterLink, RouterView } from 'vue-router';
+  import { RouterView } from 'vue-router'
+  import AppHeader from '../src/components/Header.vue'
 </script>
 
 <template>
   <div>
-    <nav>
-      <RouterLink to="/login">Login</RouterLink> |
-      <RouterLink to="/dashboard">Dashboard</RouterLink> |
-      <RouterLink to="/mis-reservas">Reservas</RouterLink> |
-      <RouterLink to="/reservas/nueva">Nueva Reserva</RouterLink> |
-      <RouterLink to="/admin/servicios">Admin</RouterLink>
-    </nav>
+    <AppHeader />
 
     <main>
       <RouterView />

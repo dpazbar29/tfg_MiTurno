@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', {
     }),
 
     getters: {
-        isAuthenticated: (state) => !!state.token,
+        isAuthenticated: (state) => !!state.token && !!state.user,
         userRole: (state) => state.user?.rol || null,
         isAdmin: (state) => state.user?.rol === 'admin',
         isEmpleado: (state) => state.user?.rol === 'empleado',
@@ -21,11 +21,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     actions: {
-
         setSession(user, token) {
             this.user = user
             this.token = token
-            
+
             localStorage.setItem('user', JSON.stringify(user))
             localStorage.setItem('token', token)
 
@@ -35,6 +34,7 @@ export const useAuthStore = defineStore('auth', {
         clearSession() {
             this.user = null
             this.token = null
+            this.error = null
 
             localStorage.removeItem('user')
             localStorage.removeItem('token')
@@ -81,14 +81,16 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async fetchUser() {
-            if (!this.token) return
+            if (!this.token) return null
 
             try {
                 const { data } = await api.get('/me')
                 this.user = data
                 localStorage.setItem('user', JSON.stringify(data))
+                return data
             } catch (error) {
                 this.clearSession()
+                throw error
             }
         },
 
@@ -96,6 +98,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 await api.post('/logout')
             } catch (error) {
+                console.error(error)
             } finally {
                 this.clearSession()
             }
