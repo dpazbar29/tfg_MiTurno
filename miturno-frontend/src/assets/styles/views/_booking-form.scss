@@ -45,7 +45,7 @@
   &__status,
   &__empty {
     border: 1px solid var(--color-border);
-    background-color: var(--color-surface);
+    background-color: var(--color-surface-soft);
     color: var(--color-text);
   }
 
@@ -56,9 +56,9 @@
   }
 
   &__message--success {
-    border: 1px solid var(--color-primary);
-    background-color: color-mix(in srgb, var(--color-primary) 10%, white);
-    color: var(--color-text);
+    border: 1px solid var(--color-status-success-border);
+    background-color: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
   }
 
   &__form {
@@ -110,6 +110,11 @@
     background-color: var(--color-surface);
     color: var(--color-text);
     font: inherit;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__input,
@@ -121,9 +126,9 @@
   }
 
   &__select {
-    appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    appearance: none;
     padding-right: 2.75rem;
     background-repeat: no-repeat;
     background-position: right var(--space-4) center;
@@ -131,8 +136,8 @@
   }
 
   &__input[type='date'] {
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     min-width: 0;
     padding-right: var(--space-4);
   }
@@ -237,18 +242,26 @@
     place-items: center;
     min-height: 2.75rem;
     padding: 0 var(--space-4);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-interactive-secondary-border);
     border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    color: var(--color-text);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
     font-weight: 600;
     text-align: center;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+
+  &__hour-option:hover .booking-form__hour-label {
+    background-color: var(--color-interactive-secondary-hover);
   }
 
   &__hour-option--selected &__hour-label {
-    border-color: var(--color-primary);
-    background-color: color-mix(in srgb, var(--color-primary) 12%, white);
-    color: var(--color-text);
+    border-color: var(--color-interactive-selected-border);
+    background-color: var(--color-interactive-selected-bg);
+    color: var(--color-interactive-selected-text);
   }
 
   &__actions {
@@ -266,6 +279,11 @@
     border-radius: var(--radius-md);
     font-weight: 700;
     cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__button--primary {
@@ -280,12 +298,12 @@
 
   &__button--secondary {
     width: 100%;
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
 
     &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-border) 20%, white);
+      background-color: var(--color-interactive-secondary-hover);
     }
   }
 

@@ -52,7 +52,7 @@
   &__status,
   &__empty {
     border: 1px solid var(--color-border);
-    background-color: var(--color-surface);
+    background-color: var(--color-surface-soft);
     color: var(--color-text);
   }
 
@@ -63,9 +63,9 @@
   }
 
   &__message--success {
-    border: 1px solid var(--color-primary);
-    background-color: color-mix(in srgb, var(--color-primary) 10%, white);
-    color: var(--color-text);
+    border: 1px solid var(--color-status-success-border);
+    background-color: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
   }
 
   &__grid {
@@ -85,7 +85,8 @@
     transition:
       background-color 180ms ease,
       border-color 180ms ease,
-      color 180ms ease;
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__button--primary {
@@ -176,26 +177,27 @@
     transition:
       background-color 180ms ease,
       border-color 180ms ease,
-      color 180ms ease;
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__button--secondary {
-    border-color: var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text);
+    border-color: var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
 
     &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-border) 18%, white);
+      background-color: var(--color-interactive-secondary-hover);
     }
   }
 
   &__button--danger {
-    border-color: var(--color-error);
-    background-color: transparent;
-    color: var(--color-error);
+    border-color: var(--color-danger-border);
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-text);
 
     &:hover:not(:disabled) {
-      background-color: var(--color-error-bg);
+      background-color: var(--color-danger-hover);
     }
   }
 
@@ -241,13 +243,13 @@
   }
 
   &__status--active {
-    background-color: color-mix(in srgb, var(--color-primary) 12%, white);
-    color: var(--color-text);
+    background-color: var(--color-status-active-bg);
+    color: var(--color-status-active-text);
   }
 
   &__status--inactive {
-    background-color: color-mix(in srgb, var(--color-border) 24%, white);
-    color: var(--color-text-muted);
+    background-color: var(--color-status-inactive-bg);
+    color: var(--color-status-inactive-text);
   }
 
   &__description {
@@ -275,7 +277,7 @@
   display: grid;
   place-items: center;
   padding: var(--space-4);
-  background-color: rgb(0 0 0 / 0.45);
+  background-color: var(--color-surface-overlay);
 
   &__dialog {
     width: min(100%, 40rem);
@@ -310,18 +312,22 @@
   &__close {
     min-width: 2.75rem;
     min-height: 2.75rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-interactive-secondary-border);
     border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    color: var(--color-text);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
     font: inherit;
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
   }
 
   &__close:hover {
-    background-color: color-mix(in srgb, var(--color-border) 18%, white);
+    background-color: var(--color-interactive-secondary-hover);
   }
 
   &__close:focus-visible {
@@ -362,6 +368,11 @@
     background-color: var(--color-surface);
     color: var(--color-text);
     font: inherit;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__input {
@@ -375,10 +386,16 @@
     resize: vertical;
   }
 
+  &__input::placeholder,
+  &__textarea::placeholder {
+    color: var(--color-text-muted);
+  }
+
   &__input--error,
   &__textarea--error {
     border-color: var(--color-error);
     background-color: var(--color-error-bg);
+    color: var(--color-text);
   }
 
   &__error {
@@ -420,6 +437,11 @@
     font: inherit;
     font-weight: 700;
     cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   &__button--primary {
@@ -432,12 +454,12 @@
   }
 
   &__button--secondary {
-    border-color: var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text);
+    border-color: var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
 
     &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--color-border) 18%, white);
+      background-color: var(--color-interactive-secondary-hover);
     }
   }
 

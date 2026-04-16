@@ -141,7 +141,7 @@
     min-height: 2rem;
     padding: 0.125rem 0.625rem;
     border-radius: var(--radius-full, 9999px);
-    background-color: color-mix(in srgb, var(--color-primary) 12%, white);
+    background-color: var(--color-interactive-selected-bg);
     color: var(--color-text);
     font-size: 0.875rem;
     font-weight: 600;
@@ -151,7 +151,7 @@
     margin: 0;
     padding: var(--space-3);
     border-radius: var(--radius-md);
-    background-color: color-mix(in srgb, var(--color-border) 18%, white);
+    background-color: var(--color-surface-soft);
     color: var(--color-text-muted);
   }
 
@@ -186,7 +186,7 @@
   }
 
   &__cancel:active:not(:disabled) {
-    background-color: color-mix(in srgb, var(--color-error) 16%, white);
+    background-color: var(--color-error-bg);
   }
 
   &__cancel:focus-visible {

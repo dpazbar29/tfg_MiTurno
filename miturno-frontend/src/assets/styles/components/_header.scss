@@ -4,7 +4,8 @@
   z-index: 40;
   border-bottom: 1px solid var(--color-border);
   background-color: color-mix(in srgb, var(--color-surface) 92%, white);
-  backdrop-filter: blur(10px);
+  //backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
 
   &__container {
     width: 100%;
@@ -29,6 +30,60 @@
     border-radius: var(--radius-md);
   }
 
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
+  &__theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+
+    &:hover {
+      background-color: var(--color-interactive-hover);
+    }
+
+    &[aria-pressed='true'] {
+      border-color: var(--color-interactive-active-border);
+      background-color: var(--color-interactive-active);
+      color: var(--color-interactive-active-text);
+    }
+  }
+
+  &__theme-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    min-width: 1.25rem;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &__theme-text {
+    line-height: 1;
+    white-space: nowrap;
+  }
+
   &__menu-button {
     display: inline-flex;
     flex-direction: column;
@@ -43,6 +98,15 @@
     background-color: var(--color-surface);
     color: var(--color-text);
     cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__menu-button:hover {
+    background-color: var(--color-interactive-hover);
   }
 
   &__menu-button-line {
@@ -63,7 +127,7 @@
     display: block;
   }
 
-  &__nav .app-header__list {
+  &__list {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--space-2);
@@ -72,14 +136,14 @@
     list-style: none;
   }
 
-  &__nav .app-header__item {
+  &__item {
     display: flex;
     width: 100%;
     margin: 0;
     padding: 0;
   }
 
-  &__nav .app-header__link {
+  &__link {
     display: inline-flex;
     align-items: center;
     width: 100%;
@@ -98,27 +162,32 @@
       box-shadow 180ms ease;
 
     &:hover {
-      background-color: color-mix(in srgb, var(--color-border) 18%, white);
+      background-color: var(--color-interactive-hover);
     }
 
     &[aria-current='page'] {
-      border-color: var(--color-primary);
-      background-color: color-mix(in srgb, var(--color-primary) 12%, white);
-      color: var(--color-text);
+      border-color: var(--color-interactive-active-border);
+      background-color: var(--color-interactive-active);
+      color: var(--color-interactive-active-text);
     }
   }
 
   &__brand:focus-visible,
+  &__theme-toggle:focus-visible,
   &__menu-button:focus-visible,
-  &__nav .app-header__link:focus-visible {
-    outline: 3px solid var(--color-focus);
+  &__link:focus-visible {
+    outline: 3px solid var(--color-focus, var(--focus-ring));
     outline-offset: 3px;
   }
 
   @media (min-width: 768px) {
     &__container {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto auto 1fr;
       padding: var(--space-4) var(--space-6);
+    }
+
+    &__controls {
+      justify-self: start;
     }
 
     &__menu-button {
@@ -132,7 +201,7 @@
       margin-left: auto;
     }
 
-    &__nav .app-header__list {
+    &__list {
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
@@ -142,16 +211,30 @@
       width: auto;
     }
 
-    &__nav .app-header__item {
+    &__item {
       display: flex;
       width: auto;
       flex: 0 0 auto;
     }
 
-    &__nav .app-header__link {
+    &__link {
       width: auto;
       justify-content: center;
       white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 420px) {
+    &__container {
+      grid-template-columns: 1fr;
+    }
+
+    &__controls {
+      justify-content: space-between;
+    }
+
+    &__theme-toggle {
+      flex: 1 1 auto;
     }
   }
 }
