@@ -13,7 +13,7 @@ class EmpleadoController extends Controller
      */
     public function index()
     {
-        return Empleado::with('usuario')->get();
+        return Empleado::with('usuario', 'servicios')->get();
     }
 
     /**
@@ -38,7 +38,7 @@ class EmpleadoController extends Controller
      */
     public function show(Empleado $empleado)
     {
-        return $empleado->load('usuario');
+        return $empleado->load('usuario', 'servicios');
     }
 
     /**
@@ -66,5 +66,19 @@ class EmpleadoController extends Controller
         $empleado->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function syncServicios(Request $request, Empleado $empleado)
+    {
+        $data = $request->validate([
+            'servicio_ids' => 'array',
+            'servicio_ids.*' => 'exists:servicios,id'
+        ]);
+
+        $empleado->servicios()->sync($data['servicio_ids'] ?? []);
+
+        return response()->json(
+            $empleado->load(['usuario', 'servicios'])
+        );
     }
 }

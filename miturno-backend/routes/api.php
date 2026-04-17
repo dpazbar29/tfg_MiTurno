@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
     Route::apiResource('servicios', ServicioController::class);
     Route::apiResource('empleados', EmpleadoController::class);
     Route::apiResource('horarios', HorarioController::class);
+    Route::put('empleados/{empleado}/servicios', [EmpleadoController::class, 'syncServicios']);
     
     // Admin/empleado también gestionan reservas/notificaciones
     Route::apiResource('reservas', ReservaController::class)->except(['index', 'store', 'show']);

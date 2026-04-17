@@ -8,6 +8,7 @@ import ServiciosView from '../views/ServiciosView.vue'
 import NuevaReservaView from '../views/NuevaReservaView.vue'
 import MisReservasView from '../views/MisReservasView.vue'
 import ServiciosViewAdmin from '../views/admin/ServiciosView.vue'
+import EmpleadosViewAdmin from '../views/admin/EmpleadosView.vue'
 
 const routes = [
     { path: '/', redirect: '/dashboard', },
@@ -21,6 +22,7 @@ const routes = [
     
     { path: '/admin', redirect: '/admin/servicios', meta: { requiresAuth: true, roles: ['admin'], }, },
     { path: '/admin/servicios', name: 'admin-servicios', component: ServiciosViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Servicios admin', navOrder: 2, showInNav: true, }, },
+    { path: '/admin/empleados', name: 'admin-empleados', component: EmpleadosViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Empleados admin', navOrder: 3, showInNav: true, }, },
 ]
 
 const router = createRouter({
