@@ -1,20 +1,123 @@
 <script setup>
 import { ref, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
-import { getEmpleados, getEmpleado, syncServiciosEmpleado } from '../../api/empleados'
+import { useForm } from 'vee-validate'
+import * as yup from 'yup'
+import { getEmpleados, getEmpleado, createEmpleado, syncServiciosEmpleado, updateEmpleado, deleteEmpleado, } from '../../api/empleados'
 import { getServicios } from '../../api/servicios'
 
 const empleados = ref([])
 const servicios = ref([])
 const loading = ref(false)
 const saving = ref(false)
+const deletingEmployeeId = ref(null)
+
 const empleadoEditando = ref(null)
+const empleadoPerfilEditando = ref(null)
+const mostrarModalPerfil = ref(false)
+const modoPerfil = ref('crear')
+
 const serviciosSeleccionados = ref([])
+
 const error = ref(null)
 const success = ref(null)
 
 const modalRef = ref(null)
 const modalTitleRef = ref(null)
+const editModalRef = ref(null)
+const editModalTitleRef = ref(null)
 const lastTriggerRef = ref(null)
+
+const employeeSchema = yup.object({
+    nombre: yup
+        .string()
+        .trim()
+        .required('El nombre es obligatorio.'),
+    apellidos: yup
+        .string()
+        .trim()
+        .required('Los apellidos son obligatorios.'),
+    email: yup
+        .string()
+        .trim()
+        .required('El correo electrónico es obligatorio.')
+        .email('Introduce un correo electrónico válido.'),
+    telefono: yup
+        .string()
+        .nullable()
+        .test(
+            'telefono-valido',
+            'Introduce un teléfono válido.',
+            (value) => !value || /^[0-9+\s()-]{6,20}$/.test(value),
+        ),
+    password: yup
+        .string()
+        .transform((value) => value ?? '')
+        .test('password-condicional', 'La contraseña debe tener al menos 8 caracteres.', function (value) {
+        const esCrear = modoPerfil.value === 'crear'
+            if (esCrear) return !!value && value.length >= 8
+            if (!value) return true
+            return value.length >= 8
+        }),
+    especialidades: yup
+        .string()
+        .nullable(),
+    fecha_contratacion: yup
+        .string()
+        .required('La fecha de contratación es obligatoria.'),
+    activo: yup
+        .boolean()
+        .required(),
+    fecha_nacimiento: yup
+        .string()
+        .nullable()
+        .test('fecha-nacimiento-valida', 'La fecha de nacimiento no es válida.', (value) => {
+            if (!value) return true
+            return !Number.isNaN(new Date(value).getTime())
+        }),
+})
+
+const {
+    defineField,
+    handleSubmit,
+    errors: editErrors,
+    resetForm,
+    setErrors,
+} = useForm({
+    validationSchema: employeeSchema,
+    initialValues: {
+        nombre: '',
+        apellidos: '',
+        email: '',
+        telefono: '',
+        password: '',
+        especialidades: '',
+        fecha_contratacion: '',
+        activo: true,
+        fecha_nacimiento: '',
+    },
+})
+
+const [nombre, nombreAttrs] = defineField('nombre')
+const [apellidos, apellidosAttrs] = defineField('apellidos')
+const [email, emailAttrs] = defineField('email')
+const [telefono, telefonoAttrs] = defineField('telefono')
+const [password, passwordAttrs] = defineField('password')
+const [especialidades, especialidadesAttrs] = defineField('especialidades')
+const [fechaContratacion, fechaContratacionAttrs] = defineField('fecha_contratacion')
+const [activo, activoAttrs] = defineField('activo')
+const [fechaNacimiento, fechaNacimientoAttrs] = defineField('fecha_nacimiento')
+
+const tituloModalPerfil = computed(() =>
+    modoPerfil.value === 'crear'
+        ? 'Nuevo empleado'
+        : `Editar perfil de ${empleadoPerfilEditando.value?.usuario?.nombre || ''} ${empleadoPerfilEditando.value?.usuario?.apellidos || ''}`.trim(),
+)
+
+const descripcionModalPerfil = computed(() =>
+    modoPerfil.value === 'crear'
+        ? 'Completa los datos básicos para crear un nuevo empleado.'
+        : 'Modifica los datos básicos del usuario y la información propia del empleado.',
+)
 
 const cargarDatos = async () => {
     loading.value = true
@@ -58,6 +161,88 @@ const cerrarModal = () => {
     lastTriggerRef.value?.focus?.()
 }
 
+const abrirModalCrear = async (event = null) => {
+    lastTriggerRef.value = event?.currentTarget || document.activeElement
+    error.value = null
+    success.value = null
+    modoPerfil.value = 'crear'
+    empleadoPerfilEditando.value = null
+    mostrarModalPerfil.value = true
+
+    resetForm({
+        values: {
+            nombre: '',
+            apellidos: '',
+            email: '',
+            telefono: '',
+            password: '',
+            especialidades: '',
+            fecha_contratacion: '',
+            activo: true,
+            fecha_nacimiento: '',
+        },
+        errors: {},
+    })
+
+    await nextTick()
+    editModalTitleRef.value?.focus()
+}
+
+const abrirModalEdicion = async (empleado, event = null) => {
+    lastTriggerRef.value = event?.currentTarget || document.activeElement
+    error.value = null
+    success.value = null
+    modoPerfil.value = 'editar'
+
+    try {
+        empleadoPerfilEditando.value = await getEmpleado(empleado.id)
+        mostrarModalPerfil.value = true
+
+        resetForm({
+            values: {
+                nombre: empleadoPerfilEditando.value.usuario?.nombre || '',
+                apellidos: empleadoPerfilEditando.value.usuario?.apellidos || '',
+                email: empleadoPerfilEditando.value.usuario?.email || '',
+                telefono: empleadoPerfilEditando.value.usuario?.telefono || '',
+                password: '',
+                especialidades: empleadoPerfilEditando.value.especialidades || '',
+                fecha_contratacion: empleadoPerfilEditando.value.fecha_contratacion || '',
+                activo: !!empleadoPerfilEditando.value.activo,
+                fecha_nacimiento: empleadoPerfilEditando.value.usuario?.fecha_nacimiento || '',
+            },
+            errors: {},
+        })
+
+        await nextTick()
+        editModalTitleRef.value?.focus()
+    } catch (err) {
+        console.error(err)
+        error.value = 'No se pudo cargar el perfil del empleado.'
+    }
+}
+
+const cerrarModalEdicion = () => {
+    mostrarModalPerfil.value = false
+    empleadoPerfilEditando.value = null
+    modoPerfil.value = 'crear'
+
+    resetForm({
+        values: {
+            nombre: '',
+            apellidos: '',
+            email: '',
+            telefono: '',
+            password: '',
+            especialidades: '',
+            fecha_contratacion: '',
+            activo: true,
+        },
+        errors: {},
+    })
+
+    lastTriggerRef.value?.focus?.()
+}
+
 const guardarServicios = async () => {
     if (!empleadoEditando.value) return
 
@@ -70,14 +255,88 @@ const guardarServicios = async () => {
             empleadoEditando.value.id,
             serviciosSeleccionados.value,
         )
+
         await cargarDatos()
-        success.value = 'Servicios actualizados correctamente.'
         cerrarModal()
+        success.value = 'Servicios actualizados correctamente.'
     } catch (err) {
         console.error(err)
-        error.value = 'No se pudieron guardar los cambios.'
+        error.value = 'No se pudieron guardar los cambios de servicios.'
     } finally {
         saving.value = false
+    }
+}
+
+const guardarPerfil = handleSubmit(async (values) => {
+    saving.value = true
+    error.value = null
+    success.value = null
+
+    try {
+        const payload = {
+            ...values,
+            rol: 'empleado',
+        }
+
+        if (modoPerfil.value === 'editar' && !payload.password) {
+            delete payload.password
+        }
+
+        if (modoPerfil.value === 'crear') {
+            await createEmpleado(payload)
+            success.value = 'Empleado creado correctamente.'
+        } else {
+            await updateEmpleado(empleadoPerfilEditando.value.id, payload)
+            success.value = 'Perfil del empleado actualizado correctamente.'
+        }
+
+        await cargarDatos()
+        cerrarModalEdicion()
+    } catch (err) {
+        console.error(err.response?.data || err)
+
+        const backendErrors = err.response?.data?.errors
+
+        if (backendErrors) {
+            setErrors({
+                nombre: backendErrors.nombre?.[0],
+                apellidos: backendErrors.apellidos?.[0],
+                email: backendErrors.email?.[0],
+                telefono: backendErrors.telefono?.[0],
+                password: backendErrors.password?.[0],
+                especialidades: backendErrors.especialidades?.[0],
+                fecha_contratacion: backendErrors.fecha_contratacion?.[0],
+                activo: backendErrors.activo?.[0],
+            })
+        } else {
+            error.value =
+                modoPerfil.value === 'crear'
+                    ? 'No se pudo crear el empleado.'
+                    : 'No se pudo actualizar el perfil del empleado.'
+        }
+    } finally {
+        saving.value = false
+    }
+})
+
+const eliminarEmpleadoConfirmado = async (empleado) => {
+    const nombreCompleto = `${empleado.usuario?.nombre || ''} ${empleado.usuario?.apellidos || ''}`.trim()
+
+    if (!window.confirm(`¿Seguro que quieres eliminar a ${nombreCompleto}?`)) return
+
+    deletingEmployeeId.value = empleado.id
+    error.value = null
+    success.value = null
+
+    try {
+        await deleteEmpleado(empleado.id)
+        await cargarDatos()
+        success.value = 'Empleado eliminado correctamente.'
+    } catch (err) {
+        console.error(err.response?.data || err)
+        error.value = 'No se pudo eliminar el empleado.'
+    } finally {
+        deletingEmployeeId.value = null
     }
 }
 
@@ -97,18 +356,16 @@ const formatearFecha = (fecha) => {
     }).format(new Date(fecha))
 }
 
-const getFocusableElements = () => {
-    if (!modalRef.value) return []
+const getFocusableElements = (container) => {
+    if (!container) return []
 
-    return modalRef.value.querySelectorAll(
+    return container.querySelectorAll(
         'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
     )
 }
 
-const manejarTabModal = (event) => {
-    if (!empleadoEditando.value || event.key !== 'Tab') return
-
-    const focusableElements = [...getFocusableElements()]
+const manejarTabEnContenedor = (event, container) => {
+    const focusableElements = [...getFocusableElements(container)]
     if (!focusableElements.length) return
 
     const firstElement = focusableElements[0]
@@ -124,14 +381,33 @@ const manejarTabModal = (event) => {
 }
 
 const manejarTecladoModal = (event) => {
-    if (!empleadoEditando.value) return
+    const hayModalServicios = !!empleadoEditando.value
+    const hayModalPerfil = modoPerfil.value === 'crear' || !!empleadoPerfilEditando.value
+
+    if (!hayModalServicios && !hayModalPerfil) return
 
     if (event.key === 'Escape') {
-        cerrarModal()
-        return
+        if (hayModalPerfil && editModalRef.value) {
+            cerrarModalEdicion()
+            return
+        }
+
+        if (hayModalServicios) {
+            cerrarModal()
+            return
+        }
     }
 
-    manejarTabModal(event)
+    if (event.key === 'Tab') {
+        if (hayModalPerfil && editModalRef.value) {
+            manejarTabEnContenedor(event, editModalRef.value)
+            return
+        }
+
+        if (hayModalServicios && modalRef.value) {
+            manejarTabEnContenedor(event, modalRef.value)
+        }
+    }
 }
 
 onMounted(cargarDatos)
@@ -148,8 +424,19 @@ onBeforeUnmount(() => document.removeEventListener('keydown', manejarTecladoModa
                         Gestión de empleados
                     </h1>
                     <p class="admin-employees__intro">
-                        Consulta cada empleado y asigna los servicios disponibles.
+                        Consulta empleados, crea nuevos perfiles, edita sus datos y asigna servicios.
                     </p>
+                </div>
+
+                <div class="admin-employees__toolbar">
+                    <button
+                        type="button"
+                        class="admin-employees__button admin-employees__button--primary"
+                        @click="abrirModalCrear($event)"
+                        :disabled="saving || deletingEmployeeId !== null"
+                    >
+                        Nuevo empleado
+                    </button>
                 </div>
             </header>
 
@@ -201,12 +488,27 @@ onBeforeUnmount(() => document.removeEventListener('keydown', manejarTecladoModa
 
                     <dl class="employee-card__meta">
                         <div class="employee-card__meta-item">
+                            <dt>Correo</dt>
+                            <dd>{{ empleado.usuario?.email || 'Sin correo' }}</dd>
+                        </div>
+
+                        <div class="employee-card__meta-item">
+                            <dt>Teléfono</dt>
+                            <dd>{{ empleado.usuario?.telefono || 'Sin teléfono' }}</dd>
+                        </div>
+
+                        <div class="employee-card__meta-item">
                             <dt>Contratación</dt>
                             <dd>
                                 <time :datetime="empleado.fecha_contratacion">
                                     {{ formatearFecha(empleado.fecha_contratacion) }}
                                 </time>
                             </dd>
+                        </div>
+
+                        <div class="employee-card__meta-item">
+                            <dt>Activo</dt>
+                            <dd>{{ empleado.activo ? 'Sí' : 'No' }}</dd>
                         </div>
 
                         <div class="employee-card__meta-item">
@@ -238,9 +540,27 @@ onBeforeUnmount(() => document.removeEventListener('keydown', manejarTecladoModa
                     <div class="employee-card__actions">
                         <button
                             type="button"
+                            class="employee-card__button employee-card__button--secondary"
+                            @click="abrirModalEdicion(empleado, $event)"
+                            :disabled="saving || deletingEmployeeId !== null"
+                        >
+                            Editar perfil
+                        </button>
+
+                        <button
+                            type="button"
+                            class="employee-card__button employee-card__button--danger"
+                            @click="eliminarEmpleadoConfirmado(empleado)"
+                            :disabled="saving || deletingEmployeeId !== null"
+                        >
+                            {{ deletingEmployeeId === empleado.id ? 'Eliminando...' : 'Eliminar' }}
+                        </button>
+
+                        <button
+                            type="button"
                             class="employee-card__button employee-card__button--primary"
                             @click="abrirModal(empleado, $event)"
-                            :aria-label="`Gestionar servicios de ${empleado.usuario?.nombre} ${empleado.usuario?.apellidos}`"
+                            :disabled="saving || deletingEmployeeId !== null"
                         >
                             Gestionar servicios
                         </button>
@@ -378,6 +698,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', manejarTecladoModa
                             type="button"
                             class="admin-employees-form__button admin-employees-form__button--secondary"
                             @click="cerrarModal"
+                            :disabled="saving"
                         >
                             Cancelar
                         </button>
@@ -388,6 +709,220 @@ onBeforeUnmount(() => document.removeEventListener('keydown', manejarTecladoModa
                             :disabled="saving"
                         >
                             {{ saving ? 'Guardando...' : 'Guardar cambios' }}
+                        </button>
+                    </footer>
+                </form>
+            </div>
+        </div>
+
+        <div
+            v-if="mostrarModalPerfil"
+            class="admin-employees-modal"
+            @click.self="cerrarModalEdicion"
+        >
+            <div
+                ref="editModalRef"
+                class="admin-employees-modal__dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="employee-edit-title"
+                aria-describedby="employee-edit-description"
+            >
+                <header class="admin-employees-modal__header">
+                    <h2
+                        id="employee-edit-title"
+                        ref="editModalTitleRef"
+                        class="admin-employees-modal__title"
+                        tabindex="-1"
+                    >
+                        {{ tituloModalPerfil }}
+                    </h2>
+
+                    <button
+                        type="button"
+                        class="admin-employees-modal__close"
+                        @click="cerrarModalEdicion"
+                        aria-label="Cerrar formulario de empleado"
+                    >
+                        ×
+                    </button>
+                </header>
+
+                <p
+                    id="employee-edit-description"
+                    class="admin-employees-modal__description"
+                >
+                    {{ descripcionModalPerfil }}
+                </p>
+
+                <form
+                    class="admin-employees-form"
+                    @submit.prevent="guardarPerfil"
+                    :aria-busy="saving ? 'true' : 'false'"
+                >
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-nombre">Nombre</label>
+                        <input
+                            id="employee-nombre"
+                            v-model="nombre"
+                            v-bind="nombreAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.nombre }"
+                            type="text"
+                        />
+                        <p v-if="editErrors.nombre" class="admin-employees-form__error">
+                            {{ editErrors.nombre }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-apellidos">Apellidos</label>
+                        <input
+                            id="employee-apellidos"
+                            v-model="apellidos"
+                            v-bind="apellidosAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.apellidos }"
+                            type="text"
+                        />
+                        <p v-if="editErrors.apellidos" class="admin-employees-form__error">
+                            {{ editErrors.apellidos }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-fecha-nacimiento">
+                            Fecha de nacimiento
+                        </label>
+                        <input
+                            id="employee-fecha-nacimiento"
+                            v-model="fechaNacimiento"
+                            v-bind="fechaNacimientoAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.fecha_nacimiento }"
+                            type="date"
+                        />
+                        <p v-if="editErrors.fecha_nacimiento" class="admin-employees-form__error">
+                            {{ editErrors.fecha_nacimiento }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-email">Correo electrónico</label>
+                        <input
+                            id="employee-email"
+                            v-model="email"
+                            v-bind="emailAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.email }"
+                            type="email"
+                        />
+                        <p v-if="editErrors.email" class="admin-employees-form__error">
+                            {{ editErrors.email }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-telefono">Teléfono</label>
+                        <input
+                            id="employee-telefono"
+                            v-model="telefono"
+                            v-bind="telefonoAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.telefono }"
+                            type="text"
+                        />
+                        <p v-if="editErrors.telefono" class="admin-employees-form__error">
+                            {{ editErrors.telefono }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-password">
+                            {{ modoPerfil === 'crear' ? 'Contraseña' : 'Nueva contraseña (opcional)' }}
+                        </label>
+                        <input
+                            id="employee-password"
+                            v-model="password"
+                            v-bind="passwordAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.password }"
+                            type="password"
+                        />
+                        <p v-if="editErrors.password" class="admin-employees-form__error">
+                            {{ editErrors.password }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-especialidades">Especialidades</label>
+                        <textarea
+                            id="employee-especialidades"
+                            v-model="especialidades"
+                            v-bind="especialidadesAttrs"
+                            class="admin-employees-form__textarea"
+                            :class="{ 'admin-employees-form__input--error': editErrors.especialidades }"
+                            rows="3"
+                        >
+                        </textarea>
+                        <p v-if="editErrors.especialidades" class="admin-employees-form__error">
+                            {{ editErrors.especialidades }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field">
+                        <label class="admin-employees-form__label" for="employee-fecha-contratacion">Fecha de contratación</label>
+                        <input
+                            id="employee-fecha-contratacion"
+                            v-model="fechaContratacion"
+                            v-bind="fechaContratacionAttrs"
+                            class="admin-employees-form__input"
+                            :class="{ 'admin-employees-form__input--error': editErrors.fecha_contratacion }"
+                            type="date"
+                        />
+                        <p v-if="editErrors.fecha_contratacion" class="admin-employees-form__error">
+                            {{ editErrors.fecha_contratacion }}
+                        </p>
+                    </div>
+
+                    <div class="admin-employees-form__field admin-employees-form__field--checkbox">
+                        <label class="admin-employees-form__checkbox-label" for="employee-activo">
+                            <input
+                                id="employee-activo"
+                                v-model="activo"
+                                v-bind="activoAttrs"
+                                class="admin-employees-form__checkbox"
+                                type="checkbox"
+                            />
+                            Empleado activo
+                        </label>
+                        <p v-if="editErrors.activo" class="admin-employees-form__error">
+                            {{ editErrors.activo }}
+                        </p>
+                    </div>
+
+                    <footer class="admin-employees-form__actions">
+                        <button
+                            type="button"
+                            class="admin-employees-form__button admin-employees-form__button--secondary"
+                            @click="cerrarModalEdicion"
+                            :disabled="saving"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="admin-employees-form__button admin-employees-form__button--primary"
+                            :disabled="saving"
+                        >
+                            {{
+                                saving
+                                    ? 'Guardando...'
+                                    : modoPerfil === 'crear'
+                                        ? 'Crear empleado'
+                                        : 'Guardar perfil'
+                            }}
                         </button>
                     </footer>
                 </form>

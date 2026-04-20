@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Empleado;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class EmpleadoController extends Controller
 {
@@ -13,7 +16,7 @@ class EmpleadoController extends Controller
      */
     public function index()
     {
-        return Empleado::with('usuario', 'servicios')->get();
+        return Empleado::with(['usuario', 'servicios'])->get();
     }
 
     /**
@@ -22,15 +25,40 @@ class EmpleadoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'usuario_id' => 'required|exists:users,id|unique:empleados,usuario_id',
+            'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'telefono' => 'nullable|string|max:255',
+            'password' => 'required|string|min:8',
             'especialidades' => 'nullable|string',
             'fecha_contratacion' => 'required|date',
-            'activo' => 'boolean',
+            'activo' => 'required|boolean',
+            'fecha_nacimiento' => 'nullable|date|before:today',
         ]);
 
-        $empleado = Empleado::create($data);
+        $empleado = DB::transaction(function () use ($data) {
+            $usuario = User::create([
+                'nombre' => $data['nombre'],
+                'apellidos' => $data['apellidos'],
+                'email' => $data['email'],
+                'telefono' => $data['telefono'] ?? null,
+                'password' => Hash::make($data['password']),
+                'rol' => 'empleado',
+                'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
+            ]);
 
-        return response()->json($empleado->load('usuario'), 201);
+            return Empleado::create([
+                'usuario_id' => $usuario->id,
+                'especialidades' => $data['especialidades'] ?? null,
+                'fecha_contratacion' => $data['fecha_contratacion'],
+                'activo' => $data['activo'],
+            ]);
+        });
+
+        return response()->json(
+            $empleado->load(['usuario', 'servicios']),
+            201
+        );
     }
 
     /**
@@ -38,7 +66,7 @@ class EmpleadoController extends Controller
      */
     public function show(Empleado $empleado)
     {
-        return $empleado->load('usuario', 'servicios');
+        return $empleado->load(['usuario', 'servicios']);
     }
 
     /**
@@ -47,15 +75,50 @@ class EmpleadoController extends Controller
     public function update(Request $request, Empleado $empleado)
     {
         $data = $request->validate([
-            'usuario_id' => 'sometimes|exists:users,id|unique:empleados,usuario_id,' . $empleado->id,
+            'nombre' => 'sometimes|required|string|max:255',
+            'apellidos' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $empleado->usuario_id,
+            'telefono' => 'sometimes|nullable|string|max:255',
+            'password' => 'sometimes|nullable|string|min:8',
             'especialidades' => 'sometimes|nullable|string',
             'fecha_contratacion' => 'sometimes|required|date',
             'activo' => 'sometimes|boolean',
+            'fecha_nacimiento' => 'nullable|date|before:today',
         ]);
 
-        $empleado->update($data);
+        DB::transaction(function () use ($data, $empleado) {
+            if (
+                array_key_exists('nombre', $data) ||
+                array_key_exists('apellidos', $data) ||
+                array_key_exists('email', $data) ||
+                array_key_exists('telefono', $data) ||
+                array_key_exists('password', $data)
+            ) {
+                $usuarioData = [
+                    'nombre' => $data['nombre'] ?? $empleado->usuario->nombre,
+                    'apellidos' => $data['apellidos'] ?? $empleado->usuario->apellidos,
+                    'email' => $data['email'] ?? $empleado->usuario->email,
+                    'telefono' => array_key_exists('telefono', $data)
+                        ? $data['telefono']
+                        : $empleado->usuario->telefono,
+                    'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
+                ];
 
-        return $empleado->load('usuario');
+                if (!empty($data['password'])) {
+                    $usuarioData['password'] = Hash::make($data['password']);
+                }
+
+                $empleado->usuario->update($usuarioData);
+            }
+
+            $empleado->update(collect($data)->only([
+                'especialidades',
+                'fecha_contratacion',
+                'activo',
+            ])->toArray());
+        });
+
+        return $empleado->fresh()->load(['usuario', 'servicios']);
     }
 
     /**
@@ -63,7 +126,13 @@ class EmpleadoController extends Controller
      */
     public function destroy(Empleado $empleado)
     {
-        $empleado->delete();
+        $empleado->load('usuario');
+
+        if ($empleado->usuario) {
+            $empleado->usuario->delete();
+        } else {
+            $empleado->delete();
+        }
 
         return response()->json(null, 204);
     }
@@ -72,7 +141,7 @@ class EmpleadoController extends Controller
     {
         $data = $request->validate([
             'servicio_ids' => 'array',
-            'servicio_ids.*' => 'exists:servicios,id'
+            'servicio_ids.*' => 'exists:servicios,id',
         ]);
 
         $empleado->servicios()->sync($data['servicio_ids'] ?? []);
