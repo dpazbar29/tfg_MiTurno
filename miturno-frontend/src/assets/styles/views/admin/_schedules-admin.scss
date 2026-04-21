@@ -1,0 +1,599 @@
+.admin-schedules {
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: var(--space-4);
+  background-color: var(--color-bg);
+
+  &__container {
+    width: 100%;
+    max-width: 90rem;
+    display: grid;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  &__heading {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__intro {
+    margin: 0;
+    max-width: 65ch;
+    color: var(--color-text-muted);
+  }
+
+  &__toolbar {
+    display: grid;
+    gap: var(--space-4);
+    align-items: end;
+  }
+
+  &__filter-group {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+    align-content: end;
+  }
+
+  &__filter {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__filter-label {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__filter-help {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  &__select,
+  &__button {
+    min-height: 2.75rem;
+    border-radius: var(--radius-md);
+    font: inherit;
+  }
+
+  &__select {
+    width: 100%;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+
+  &__select:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 11rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__button:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__button:disabled,
+  &__select:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &__button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &__button--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary-hover);
+    }
+  }
+
+  &__status,
+  &__empty,
+  &__message {
+    margin: 0;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+  }
+
+  &__status,
+  &__empty {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-soft);
+    color: var(--color-text);
+  }
+
+  &__message--error {
+    border: 1px solid var(--color-error);
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+  }
+
+  &__message--success {
+    border: 1px solid var(--color-status-success-border);
+    background-color: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
+  }
+
+  &__week {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    padding: var(--space-6);
+
+    &__container {
+      padding: var(--space-8);
+    }
+
+    &__toolbar {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--space-4);
+      align-items: end;
+    }
+
+    &__button {
+      align-self: center;
+    }
+
+    &__week {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1200px) {
+    &__header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: end;
+    }
+
+    &__toolbar {
+      min-width: min(100%, 28rem);
+    }
+
+    &__week {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+.schedule-day-card {
+    align-content: start;
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  &__add-button {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-interactive-secondary-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__add-button:hover:not(:disabled) {
+    background-color: var(--color-interactive-secondary-hover);
+  }
+
+  &__add-button:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__add-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &__list {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-soft);
+  }
+
+  &__info {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  &__time {
+    margin: 0;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__type,
+  &__state {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__separator {
+    color: var(--color-text-faint);
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    width: 100%;
+    padding: 0 var(--space-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__button:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &__button--secondary {
+    border-color: var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+  }
+
+  &__button--danger {
+    border-color: var(--color-danger-border);
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-text);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-danger-hover);
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    align-self: start;
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 640px) {
+    &__actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+.admin-schedules-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-surface-overlay);
+
+  &__dialog {
+    width: min(100%, 44rem);
+    max-height: min(90dvh, 48rem);
+    overflow: auto;
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  &__heading {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__description {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-interactive-secondary-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__close:hover:not(:disabled) {
+    background-color: var(--color-interactive-secondary-hover);
+  }
+
+  &__close:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+.admin-schedules-form {
+  display: grid;
+  gap: var(--space-5);
+
+  &__field {
+    display: grid;
+    gap: var(--space-2);
+
+    &--checkbox {
+      gap: var(--space-3);
+    }
+  }
+
+  &__label {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+  }
+
+  &__input:focus-visible,
+  &__checkbox:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__input--error {
+    border-color: var(--color-error);
+    background-color: var(--color-error-bg);
+  }
+
+  &__checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  &__checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+  }
+
+  &__error {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-error);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    min-width: 10rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  &__button:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+
+  &__button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &__button--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary-hover);
+    }
+  }
+
+  &__button--secondary {
+    border-color: var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+  }
+
+  @media (min-width: 768px) {
+    &__actions {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-schedules__button,
+  .admin-schedules__select,
+  .schedule-day-card__add-button,
+  .schedule-day-card__button,
+  .admin-schedules-modal__close,
+  .admin-schedules-form__input,
+  .admin-schedules-form__checkbox,
+  .admin-schedules-form__button {
+    transition: none;
+  }
+}

@@ -13,7 +13,11 @@ class HorarioController extends Controller
      */
     public function index()
     {
-        return Horario::with('empleado.usuario')->get();
+        return Horario::with('empleado.usuario')
+            ->orderBy('empleado_id')
+            ->orderBy('dia_semana')
+            ->orderBy('hora_inicio')
+            ->get();
     }
 
     /**
@@ -27,8 +31,27 @@ class HorarioController extends Controller
             'hora_inicio' => 'required|date_format:H:i',
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
             'tipo' => 'required|in:normal,festivo,cierre',
-            'activo' => 'boolean',
+            'activo' => 'sometimes|boolean',
         ]);
+
+        $solapa = Horario::where('empleado_id', $data['empleado_id'])
+            ->where('dia_semana', $data['dia_semana'])
+            ->where('activo', true)
+            ->where(function ($query) use ($data) {
+                $query->where('hora_inicio', '<', $data['hora_fin'])
+                    ->where('hora_fin', '>', $data['hora_inicio']);
+            })
+            ->exists();
+        
+        if ($solapa) {
+            return response()->json([
+                'message' => 'El horario se solapa con otra franja existente.',
+                'errors' => [
+                    'hora_inicio' => ['El horario se solapa con otra franja existente.'],
+                    'hora_fin' => ['El horario se solapa con otra franja existente.'],
+                ],
+            ], 422);
+        }
 
         $horario = Horario::create($data);
 
@@ -52,20 +75,55 @@ class HorarioController extends Controller
             'empleado_id' => 'sometimes|exists:empleados,id',
             'dia_semana' => 'sometimes|integer|min:0|max:6',
             'hora_inicio' => 'sometimes|date_format:H:i',
-            'hora_fin' => 'sometimes|date_format:H:i|after:hora_inicio',
+            'hora_fin' => 'sometimes|date_format:H:i',
             'tipo' => 'sometimes|in:normal,festivo,cierre',
             'activo' => 'sometimes|boolean',
         ]);
 
+        $empleadoId = $data['empleado_id'] ?? $horario->empleado_id;
+        $diaSemana = $data['dia_semana'] ?? $horario->dia_semana;
+        $horaInicio = $data['hora_inicio'] ?? $horario->hora_inicio;
+        $horaFin = $data['hora_fin'] ?? $horario->hora_fin;
+
+        if ($horaFin <= $horaInicio) {
+            return response()->json([
+                'message' => 'La hora de fin debe ser posterior a la hora de inicio.',
+                'errors' => [
+                    'hora_inicio' => ['La hora de inicio debe ser anterior a la hora de fin.'],
+                    'hora_fin' => ['La hora de fin debe ser posterior a la hora de inicio.'],
+                ],
+            ], 422);
+        }
+
+        $solapa = Horario::where('empleado_id', $empleadoId)
+            ->where('dia_semana', $diaSemana)
+            ->where('activo', true)
+            ->where('id', '!=', $horario->id)
+            ->where(function ($query) use ($horaInicio, $horaFin) {
+                $query->where('hora_inicio', '<', $horaFin)
+                    ->where('hora_fin', '>', $horaInicio);
+            })
+            ->exists();
+        
+        if ($solapa) {
+            return response()->json([
+                'message' => 'El horario se solapa con otra franja existente.',
+                'errors' => [
+                    'hora_inicio' => ['El horario se solapa con otra franja existente.'],
+                    'hora_fin' => ['El horario se solapa con otra franja existente.'],
+                ],
+            ], 422);
+        }
+
         $horario->update($data);
 
-        return $horario->load('empleado.usuario');
+        return $horario->fresh()->load('empleado.usuario');
     }
 
     /**
      * Eliminar un horario específico.
      */
-    public function destroy(Horaio $horario)
+    public function destroy(Horario $horario)
     {
         $horario->delete();
 

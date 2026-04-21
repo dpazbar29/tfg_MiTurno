@@ -9,6 +9,7 @@ import NuevaReservaView from '../views/NuevaReservaView.vue'
 import MisReservasView from '../views/MisReservasView.vue'
 import ServiciosViewAdmin from '../views/admin/ServiciosView.vue'
 import EmpleadosViewAdmin from '../views/admin/EmpleadosView.vue'
+import HorariosViewAdmin from '../views/admin/HorariosView.vue'
 
 const routes = [
     { path: '/', redirect: '/dashboard', },
@@ -23,6 +24,7 @@ const routes = [
     { path: '/admin', redirect: '/admin/servicios', meta: { requiresAuth: true, roles: ['admin'], }, },
     { path: '/admin/servicios', name: 'admin-servicios', component: ServiciosViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Servicios admin', navOrder: 2, showInNav: true, }, },
     { path: '/admin/empleados', name: 'admin-empleados', component: EmpleadosViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Empleados admin', navOrder: 3, showInNav: true, }, },
+    { path: '/admin/horarios', name: 'admin-horarios', component: HorariosViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Horarios admin', navOrder: 4, showInNav: true, }, },
 ]
 
 const router = createRouter({
