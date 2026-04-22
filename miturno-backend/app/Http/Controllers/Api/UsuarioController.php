@@ -56,8 +56,8 @@ class UsuarioController extends Controller
         $data = $request->validate([
             'nombre' => 'sometimes|required|string|max:255',
             'apellidos' => 'sometimes|required|string|max:255',
-            'fecha_nacimiento' => 'sometimes|date',
-            'email' => 'sometimes|email|unique:users,email' . $user->id,
+            'fecha_nacimiento' => 'sometimes|nullable|date',
+            'email' => ['sometimes', 'required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => 'sometimes|string|min:6',
             'rol' => 'sometimes|in:cliente,empleado,admin',
             'telefono' => 'sometimes|nullable|string|max:255',
@@ -81,5 +81,31 @@ class UsuarioController extends Controller
         $user->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function buscarClientes(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $clientes = User::query()
+            ->select('id', 'nombre', 'apellidos', 'email', 'telefono')
+            ->where('rol', 'cliente')
+            ->where('activo', true)
+            ->where(function ($query) use ($q) {
+                $query->where('nombre', 'like', "%{$q}%")
+                    ->orWhere('apellidos', 'like', "%{$q}%")
+                    ->orWhereRaw("CONCAT(nombre, ' ', apellidos) like ?", ["%{$q}%"])
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('telefono', 'like', "%{$q}%");
+            })
+            ->orderBy('nombre')
+            ->orderBy('apellidos')
+            ->limit(10)
+            ->get();
+        
+        return response()->json($clientes);
     }
 }

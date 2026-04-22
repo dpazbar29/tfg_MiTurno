@@ -28,7 +28,7 @@ class User extends Authenticatable
         'activo',
     ];
 
-    protected $hiden = [
+    protected $hidden = [
         'password',
         'remember_token',
     ];

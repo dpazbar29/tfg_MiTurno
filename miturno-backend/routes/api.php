@@ -35,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ADMIN/EMPLEADO pueden gestionar todo
 Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
+    Route::get('usuarios/clientes/buscar', [UsuarioController::class, 'buscarClientes']);
+
     Route::apiResource('usuarios', UsuarioController::class);
     Route::apiResource('servicios', ServicioController::class);
     Route::apiResource('empleados', EmpleadoController::class);
