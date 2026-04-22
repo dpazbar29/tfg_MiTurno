@@ -1,7 +1,14 @@
 import api from "./axios"
 
-export const getDisponibilidad = async (params) => {
-    const { data } = await api.get('/disponibilidad', { params })
+export const getReservas = async () => {
+    const { data } = await api.get('/mis-reservas')
+    return data
+}
+
+export const getReservasAdmin = async (filters = {}) => {
+    const { data } = await api.get('/admin/reservas', {
+      params: filters,
+    })
     return data
 }
 
@@ -10,12 +17,21 @@ export const crearReserva = async (payload) => {
     return data
 }
 
-export const getReservas = async () => {
-    const { data } = await api.get('/reservas')
+export const updateReserva = async (id, payload) => {
+    const { data } = await api.put(`/reservas/${id}`, payload)
     return data
 }
 
-export const cancelarReserva = async (reservaId) => {
-    const { data } = await api.patch(`/reservas/${reservaId}/cancelar`)
+export const deleteReserva = async (id) => {
+    await api.delete(`/reservas/${id}`)
+}
+
+export const cancelarReserva = async (id) => {
+    const { data } = await api.patch(`/reservas/${id}/cancelar`)
+    return data
+}
+
+export const getDisponibilidad = async (params) => {
+    const { data } = await api.get('/disponibilidad', { params })
     return data
 }

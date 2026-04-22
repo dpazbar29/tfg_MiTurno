@@ -14,19 +14,72 @@ use Illuminate\Http\Request;
 class ReservaController extends Controller
 {
     /**
-     * Obtener todas las reservas.
+     * Listado para cliente: solo sus reservas.
      */
-    public function index(Request $request)
+    public function indexCliente(Request $request)
     {
         $user = $request->user();
 
-        $reservas = \App\Models\Reserva::with([
-            'servicio:id,nombre,duracion_minutos,precio',
-            'empleado.usuario:id,nombre,apellidos',
-        ])
-        ->where('usuario_id', $user->id)
-        ->orderBy('fecha_hora_inicio', 'asc')
-        ->get();
+        $reservas = Reserva::with([
+                'servicio:id,nombre,duracion_minutos,precio',
+                'empleado.usuario:id,nombre,apellidos',
+                'usuario:id,nombre,apellidos,email',
+            ])
+            ->where('usuario_id', $user->id)
+            ->orderBy('fecha_hora_inicio', 'asc')
+            ->paginate(15);
+
+        return response()->json($reservas);
+    }
+
+    /**
+     * Listado para administrador: todas las reservas con filtros.
+     */
+    public function indexAdmin(Request $request)
+    {
+        $query = Reserva::with([
+                'servicio:id,nombre,duracion_minutos,precio',
+                'empleado.usuario:id,nombre,apellidos',
+                'usuario:id,nombre,apellidos,email',
+            ])
+            ->orderBy('fecha_hora_inicio', 'desc');
+
+        // Filtros opcionales
+        if ($request->filled('fecha')) {
+            $fecha = Carbon::parse($request->fecha);
+            $query->whereDate('fecha_hora_inicio', $fecha->toDateString());
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('empleado_id')) {
+            $query->where('empleado_id', $request->empleado_id);
+        }
+
+        if ($request->filled('usuario_id')) {
+            $query->where('usuario_id', $request->usuario_id);
+        }
+
+        if ($request->filled('servicio_id')) {
+            $query->where('servicio_id', $request->servicio_id);
+        }
+
+        if ($request->filled('busqueda')) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('usuario', function ($userQuery) use ($request) {
+                    $userQuery->where('nombre', 'like', "%{$request->busqueda}%")
+                              ->orWhere('apellidos', 'like', "%{$request->busqueda}%")
+                              ->orWhere('email', 'like', "%{$request->busqueda}%");
+                })
+                ->orWhereHas('servicio', function ($servicioQuery) use ($request) {
+                    $servicioQuery->where('nombre', 'like', "%{$request->busqueda}%");
+                });
+            });
+        }
+
+        $reservas = $query->paginate(15)->appends($request->query());
 
         return response()->json($reservas);
     }
@@ -135,25 +188,30 @@ class ReservaController extends Controller
      * - 422: horario inválido o conflicto con otra reserva.
      */
     public function update(Request $request, Reserva $reserva)
-    {
-        $data = $request->validate([
-            'usuario_id' => 'sometimes|exists:users,id',
-            'empleado_id' => 'sometimes|nullable|exists:empleados,id',
-            'servicio_id' => 'sometimes|exists:servicios,id',
-            'fecha_hora_inicio' => 'sometimes|date',
-            'estado' => 'sometimes|in:pendiente,confirmada,cancelada,completada,ausencia',
-            'notas' => 'sometimes|nullable|string',
-        ]);
+{
+    $data = $request->validate([
+        'usuario_id' => 'sometimes|exists:users,id',
+        'empleado_id' => 'sometimes|nullable|exists:empleados,id',
+        'servicio_id' => 'sometimes|exists:servicios,id',
+        'fecha_hora_inicio' => 'sometimes|date',
+        'estado' => 'sometimes|in:pendiente,confirmada,cancelada,completada,ausencia',
+        'notas' => 'sometimes|nullable|string',
+    ]);
 
-        $nuevoEmpleadoId = $data['empleado_id'] ?? $reserva->empleado_id;
-        $nuevoServicioId = $data['servicio_id'] ?? $reserva->servicio_id;
-        $nuevaFechaInicio = $data['fecha_hora_inicio'] ?? $reserva->fecha_hora_inicio;
+    $nuevoEmpleadoId = array_key_exists('empleado_id', $data)
+        ? $data['empleado_id']
+        : $reserva->empleado_id;
 
-        $servicio = Servicio::findOrFail($nuevoServicioId);
-        $inicio = Carbon::parse($nuevaFechaInicio);
-        $fin = $inicio->copy()->addMinutes($servicio->duracion_minutos);
-        $diaSemana = $inicio->dayOfWeek;
+    $nuevoServicioId = $data['servicio_id'] ?? $reserva->servicio_id;
+    $nuevaFechaInicio = $data['fecha_hora_inicio'] ?? $reserva->fecha_hora_inicio;
 
+    $servicio = Servicio::findOrFail($nuevoServicioId);
+
+    $inicio = Carbon::parse($nuevaFechaInicio);
+    $fin = $inicio->copy()->addMinutes($servicio->duracion_minutos);
+    $diaSemana = $inicio->dayOfWeek;
+
+    if ($nuevoEmpleadoId !== null) {
         $horarioValido = Horario::where('empleado_id', $nuevoEmpleadoId)
             ->where('dia_semana', $diaSemana)
             ->where('activo', true)
@@ -164,32 +222,47 @@ class ReservaController extends Controller
 
         if (! $horarioValido) {
             return response()->json([
-                'message' => 'La reserva está fuera del horario del empleado.'
+                'message' => 'La reserva está fuera del horario del empleado.',
+                'errors' => [
+                    'fecha_hora_inicio' => ['La reserva está fuera del horario del empleado.'],
+                    'empleado_id' => ['El empleado no tiene disponibilidad para ese tramo horario.'],
+                ],
             ], 422);
         }
 
-        $solapa = Reserva::where('empleado_id', $nuevoEmpleadoId)
-            -> whereDate('fecha_hora_inicio', $inicio->toDateString())
-            ->whereIn('estado', ['pendiente', 'confirmarda'])
+        $reservasMismoDia = Reserva::with('servicio')
+            ->where('empleado_id', $nuevoEmpleadoId)
+            ->whereDate('fecha_hora_inicio', $inicio->toDateString())
+            ->whereIn('estado', ['pendiente', 'confirmada'])
             ->where('id', '!=', $reserva->id)
-            ->get()
-            ->contains(function ($otraReserva) use ($inicio, $fin) {
-                $inicioExistente = Carbon::parse($otraReserva->fecha_hora_inicio);
-                $finExistente = $inicioExistente->copy()->addMinutes($otraReserva->servicio->duracion_minutos);
+            ->get();
 
-                return $inicio < $finExistente && $fin > $inicioExistente;
-            });
-        
+        $solapa = $reservasMismoDia->contains(function ($otraReserva) use ($inicio, $fin) {
+            if (! $otraReserva->servicio) {
+                return false;
+            }
+
+            $inicioExistente = Carbon::parse($otraReserva->fecha_hora_inicio);
+            $finExistente = $inicioExistente->copy()->addMinutes($otraReserva->servicio->duracion_minutos);
+
+            return $inicio < $finExistente && $fin > $inicioExistente;
+        });
+
         if ($solapa) {
             return response()->json([
-                'message' => 'El empleado ya tiene una reserva en ese tramo horario.'
+                'message' => 'El empleado ya tiene una reserva en ese tramo horario.',
+                'errors' => [
+                    'fecha_hora_inicio' => ['El empleado ya tiene una reserva en ese tramo horario.'],
+                    'empleado_id' => ['El empleado ya tiene una reserva en ese tramo horario.'],
+                ],
             ], 422);
         }
-
-        $reserva->update($data);
-
-        return $reserva->load(['usuario', 'empleado.usuario', 'servicio']);
     }
+
+    $reserva->update($data);
+
+    return $reserva->load(['usuario', 'empleado.usuario', 'servicio']);
+}
 
     /**
      * Eliminar una reserva específica.

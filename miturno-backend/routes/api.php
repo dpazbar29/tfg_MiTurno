@@ -22,10 +22,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('catalogo-servicios', [ServicioController::class, 'catalogo']);
     Route::get('servicios/{servicio}/empleados', [ServicioController::class, 'empleados']);
     Route::patch('reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar']);
-    
-    // CLIENTES pueden ver/crear sus reservas y notificaciones
-    Route::apiResource('reservas', ReservaController::class)->only(['index', 'store', 'show']);
     Route::get('disponibilidad', [ReservaController::class, 'disponibilidad']);
+
+    // CLIENTE: sus propias reservas
+    Route::get('mis-reservas', [ReservaController::class, 'indexCliente']);
+    Route::post('reservas', [ReservaController::class, 'store']);
+    Route::get('reservas/{reserva}', [ReservaController::class, 'show']);
+
+    // CLIENTE: notificaciones
     Route::apiResource('notificaciones', NotificacionController::class)->only(['index', 'show']);
 });
 
@@ -36,35 +40,15 @@ Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
     Route::apiResource('empleados', EmpleadoController::class);
     Route::apiResource('horarios', HorarioController::class);
     Route::put('empleados/{empleado}/servicios', [EmpleadoController::class, 'syncServicios']);
-    
-    // Admin/empleado también gestionan reservas/notificaciones
-    Route::apiResource('reservas', ReservaController::class)->except(['index', 'store', 'show']);
+
+    // RESERVAS admin/empleado
+    Route::get('admin/reservas', [ReservaController::class, 'indexAdmin']);
+    Route::put('reservas/{reserva}', [ReservaController::class, 'update']);
+    Route::delete('reservas/{reserva}', [ReservaController::class, 'destroy']);
+
+    // Admin ver reserva concreta 
+    Route::get('admin/reservas/{reserva}', [ReservaController::class, 'show']);
+
+    // NOTIFICACIONES admin/empleado
     Route::apiResource('notificaciones', NotificacionController::class)->except(['index', 'show']);
 });
-
-/*
-
-RUTAS PARA PROBAR LA API
-
-Route::get('/ping', function () {
-    return response()->json(['message' => 'API OK']);
-});
-
-// Rutas API para USUARIOS
-Route::apiResource('usuarios', UsuarioController::class);
-
-// Rutas API para SERVICIOS
-Route::apiResource('servicios', ServicioController::class);
-
-// Rutas API para EMPLEADOS
-Route::apiResource('empleados', EmpleadoController::class);
-
-// Rutas API para HORARIOS
-Route::apiResource('horarios', HorarioController::class);
-
-// Rutas API para RESERVAS
-Route::apiResource('reservas', ReservaController::class);
-
-// Rutas API para NOTIFICACIONES
-Route::apiResource('notificaciones', NotificacionController::class);
-*/
