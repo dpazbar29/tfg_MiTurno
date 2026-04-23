@@ -31,6 +31,11 @@ export const useAuthStore = defineStore('auth', {
             api.defaults.headers.common.Authorization = `Bearer ${token}`
         },
 
+        setUser(user) {
+            this.user = user
+            localStorage.setItem('user', JSON.stringify(user))
+        },
+
         clearSession() {
             this.user = null
             this.token = null
@@ -85,8 +90,7 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 const { data } = await api.get('/me')
-                this.user = data
-                localStorage.setItem('user', JSON.stringify(data))
+                this.setUser(data)
                 return data
             } catch (error) {
                 this.clearSession()

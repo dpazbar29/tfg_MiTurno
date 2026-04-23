@@ -77,4 +77,46 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logout exitoso']);
     }
+
+    public function updateMe(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'nombre' => 'sometimes|required|string|max:255',
+            'apellidos' => 'sometimes|required|string|max:255',
+            'fecha_nacimiento' => 'sometimes|nullable|date|before:today',
+            'email' => ['sometimes', 'required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'telefono' => 'sometimes|nullable|string|max:255',
+            'password' => 'sometimes|nullable|string|min:6:confirmed',
+        ]);
+
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return response()->json($user->fresh());
+    }
+
+    public function destroyMe(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->rol !== 'cliente') {
+            return response()->json([
+                'message' => 'Solo los clientes pueden eliminar su propia cuenta.'
+            ], 403);
+        }
+
+        $user->currentAccessToken()?->delete();
+        $user->delete();
+
+        return response()->json([
+            'message' => 'Cuenta eliminada correctamente.'
+        ]);
+    }
 }

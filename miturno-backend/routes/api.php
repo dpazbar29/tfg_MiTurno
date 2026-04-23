@@ -18,6 +18,8 @@ Route::post('register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('me', [AuthController::class, 'me']);
+    Route::put('me', [AuthController::class, 'updateMe']);
+    Route::delete('me', [AuthController::class, 'destroyMe']);
 
     Route::get('catalogo-servicios', [ServicioController::class, 'catalogo']);
     Route::get('servicios/{servicio}/empleados', [ServicioController::class, 'empleados']);

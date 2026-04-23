@@ -38,6 +38,13 @@ class User extends Authenticatable
         'activo' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function ($user) {
+            $user->tokens()->delete();
+        });
+    }
+
     // Relación 1-1 inversa: usuario -> empleado (solo si rol=empleado)
     public function empleado()
     {
