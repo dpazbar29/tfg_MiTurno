@@ -38,7 +38,7 @@
 
   &__intro {
     margin: 0;
-    max-width: 65ch;
+    max-width: 75ch;
     color: var(--color-text-muted);
   }
 
@@ -244,6 +244,7 @@
   &__estado {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     min-height: 2rem;
     padding: 0.125rem 0.625rem;
     border-radius: var(--radius-lg);
