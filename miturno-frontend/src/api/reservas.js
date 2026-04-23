@@ -12,6 +12,11 @@ export const getReservasAdmin = async (filters = {}) => {
     return data
 }
 
+export const getReservasEmpleado = async (params = {}) => {
+    const response = await api.get('/empleado/mis-reservas', { params })
+    return response.data
+}
+
 export const crearReserva = async (payload) => {
     const { data } = await api.post('/reservas', payload)
     return data

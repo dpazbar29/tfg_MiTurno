@@ -15,4 +15,6 @@
 @use './views/admin/schedules-admin';
 @use './views/admin/reservas-admin';
 
+@use './views/empleado/reservas-empleado';
+
 @use '../styles/components/header';

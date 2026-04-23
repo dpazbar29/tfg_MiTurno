@@ -53,4 +53,7 @@ Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
 
     // NOTIFICACIONES admin/empleado
     Route::apiResource('notificaciones', NotificacionController::class)->except(['index', 'show']);
+
+    // RESERVAS EMPLEADO
+    Route::get('empleado/mis-reservas', [ReservaController::class, 'indexEmpleado']);
 });

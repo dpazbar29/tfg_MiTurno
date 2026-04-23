@@ -84,6 +84,54 @@ class ReservaController extends Controller
         return response()->json($reservas);
     }
 
+    public function indexEmpleado(Request $request)
+    {
+        $user = $request->user()->load('empleado');
+
+        if (! $user->empleado) {
+            return response()->json([
+                'message' => 'El usuario autenticado no tiene perfil de empleado.'
+            ],403);
+        }
+
+        $query = Reserva::with([
+            'servicio:id,nombre,duracion_minutos,precio',
+            'usuario:id,nombre,apellidos,email,telefono',
+            'empleado.usuario:id,nombre,apellidos'
+        ])
+        ->where('empleado_id', $user->empleado->id)
+        ->orderBy('fecha_hora_inicio', 'asc');
+
+        if ($request->filled('fecha')) {
+            $fecha = Carbon::parse($request->fecha);
+            $query->whereDate('fecha_hora_inicio', $fecha->toDateString());
+        }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        if ($request->filled('busqueda')) {
+            $busqueda = $request->busqueda;
+
+            $query->where(function ($q) use ($busqueda) {
+                $q->whereHas('usuario', function ($userQuery) use ($busqueda) {
+                    $userQuery->where('nombre', 'like', "%{$busqueda}%")
+                    ->orWhere('apellidos', 'like', "%{$busqueda}%")
+                    ->orWhere('email', 'like', "%{$busqueda}%")
+                    ->orWhere('telefono', 'like', "%{$busqueda}%");
+                })
+                ->orWhereHas('servicio', function ($servicioQuery) use ($busqueda) {
+                    $servicioQuery->where('nombre', 'like', "%{$busqueda}%");
+                });
+            });
+        }
+
+        $reservas = $query->paginate(15)->appends($request->query());
+
+        return response()->json($reservas);
+    }
+
     /**
      * Almacenar las nuevas reservas creadas.
      * 
