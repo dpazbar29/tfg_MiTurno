@@ -1,22 +1,5 @@
-@use './abstracts/tokens' as *;
-@use './abstracts/mixins' as *;
-
-@use './base/reset';
-@use './base/globals';
-
-@use './views/login';
-@use './views/register';
-@use './views/services';
-@use './views/booking-form';
-@use './views/reservations-page';
-
-@use './views/admin/services-admin';
-@use './views/admin/employees-admin';
-@use './views/admin/schedules-admin';
-@use './views/admin/reservas-admin';
-
-@use './views/empleado/reservas-empleado';
-
-@use './views/dashboard';
-
-@use '../styles/components/header';
+@use './abstracts';
+@use './base';
+@use './layout';
+@use './components';
+@use './views';

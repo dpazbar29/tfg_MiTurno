@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 @mixin focus-ring {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
@@ -10,4 +12,24 @@
   border-radius: var(--radius-md);
   background-color: #fff;
   color: var(--color-text);
+}
+
+@mixin respond-up($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $bp-sm) {
+      @content;
+    }
+  }
+
+  @if $breakpoint == md {
+    @media (min-width: $bp-md) {
+      @content;
+    }
+  }
+
+  @if $breakpoint == lg {
+    @media (min-width: $bp-lg) {
+      @content;
+    }
+  }
 }

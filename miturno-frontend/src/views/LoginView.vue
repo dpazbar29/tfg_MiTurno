@@ -1,10 +1,12 @@
 <script setup>
-import { computed, reactive } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/yup'
 import * as yup from 'yup'
+
+import AuthCard from '@/components/auth/AuthCard.vue'
+import BaseInput from '@/components/forms/BaseInput.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -26,7 +28,6 @@ const {
     defineField,
     handleSubmit,
     errors,
-    meta,
 } = useForm({
     validationSchema: loginSchema,
     initialValues: {
@@ -37,8 +38,6 @@ const {
 
 const [email, emailAttrs] = defineField('email')
 const [password, passwordAttrs] = defineField('password')
-
-const hasError = computed(() => Boolean(auth.error))
 
 const submit = handleSubmit(async (values) => {
     try {
@@ -51,90 +50,61 @@ const submit = handleSubmit(async (values) => {
 </script>
 
 <template>
-    <main class="login">
-        <section class="login__container" aria-labelledby="login-title">
-            <h1 id="login-title" class="login__title">Iniciar sesión</h1>
-            <form
-                class="login__form"
-                @submit.prevent="submit"
-                :aria-busy="auth.loading ? 'true' : 'false'"
-                novalidate
-            >
-                <div class="login__field">
-                    <label class="login__label" for="email">Correo electrónico</label>
-                    <input
-                        id="email"
-                        v-model="email"
-                        v-bind="emailAttrs"
-                        class="login__input"
-                        :class="{ 'login__input--error': errors.email }"
-                        type="email"
-                        name="email"
-                        autocomplete="email"
-                        inputmode="email"
-                        :aria-invalid="errors.email ? 'true' : 'false'"
-                        :aria-describedby="errors.email ? 'email-error' : undefined"
-                    />
-                    <p
-                    v-if="errors.email"
-                    id="email-error"
-                    class="login__field-error"
-                    aria-live="polite"
-                    >
-                    {{ errors.email }}
-                    </p>
-                </div>
+    <AuthCard title="Iniciar sesión">
+        <form
+            class="login-form"
+            @submit.prevent="submit"
+            :aria-busy="auth.loading ? 'true' : 'false'"
+            novalidate
+        >
+            <BaseInput
+                id="email"
+                v-model="email"
+                name="email"
+                label="Correo electrónico"
+                type="email"
+                autocomplete="email"
+                inputmode="email"
+                :attrs="emailAttrs"
+                :error="errors.email"
+            />
 
-                <div class="login__field">
-                    <label class="login__label" for="password">Contraseña</label>
-                    <input
-                        id="password"
-                        v-model="password"
-                        v-bind="passwordAttrs"
-                        class="login__input"
-                        :class="{ 'login__input--error': errors.password }"
-                        type="password"
-                        name="password"
-                        autocomplete="current-password"
-                        :aria-invalid="errors.password ? 'true' : 'false'"
-                        :aria-describedby="errors.pasword ? 'login-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.password"
-                        id="password-error"
-                        class="login__field-error"
-                        aria-live="polite"
-                        >
-                        {{ errors.password }}
-                    </p>
-                </div>
+            <BaseInput
+                id="password"
+                v-model="password"
+                name="password"
+                label="Contraseña"
+                type="password"
+                autocomplete="current-password"
+                :attrs="passwordAttrs"
+                :error="errors.password"
+            />
 
-                <button
-                class="login__submit"
-                :class="{ 'login__submit--loading': auth.loading }"
+            <button
+                class="login-form__submit"
+                :class="{ 'login-form__submit--loading': auth.loading }"
                 type="submit"
                 :disabled="auth.loading"
-                >
+            >
                 {{ auth.loading ? 'Entrando...' : 'Entrar' }}
-                </button>
+            </button>
 
-                <p
+            <p
                 v-if="auth.error"
                 id="login-error"
-                class="login__error"
+                class="login-form__error"
                 role="alert"
                 aria-live="assertive"
-                >
+            >
                 {{ auth.error }}
-                </p>
-            </form>
-
-            <p class="login__footer">
-                ¿No tienes cuenta?
-                <RouterLink class="login__link" to="/register">
-                Regístrate
-                </RouterLink>
             </p>
-        </section>
-    </main>
+        </form>
+
+        <p class="login-form__footer">
+            ¿No tienes cuenta?
+            <RouterLink class="login-form__link" to="/register">
+                Regístrate
+            </RouterLink>
+        </p>
+  </AuthCard>
 </template>

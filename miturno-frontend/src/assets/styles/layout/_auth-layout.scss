@@ -1,0 +1,17 @@
+@use '../abstracts' as *;
+
+.auth-layout {
+  min-height: 90dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-bg);
+
+  @include respond-up(sm) {
+    padding: var(--space-6);
+  }
+
+  @include respond-up(md) {
+    padding: var(--space-8);
+  }
+}
