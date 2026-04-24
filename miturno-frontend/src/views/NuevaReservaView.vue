@@ -63,337 +63,337 @@ const cargarServicios = async () => {
     loadingServicios.value = true
     error.value = null
 
-  try {
-    const response = await getCatalogoServicios()
-    servicios.value = response?.data ?? response ?? []
-  } catch (err) {
-    error.value = 'No se pudieron cargar los servicios.'
-    console.error(err.response?.data || err)
-  } finally {
-    loadingServicios.value = false
-  }
+    try {
+        const response = await getCatalogoServicios()
+        servicios.value = response?.data ?? response ?? []
+    } catch (err) {
+        error.value = 'No se pudieron cargar los servicios.'
+        console.error(err.response?.data || err)
+    } finally {
+        loadingServicios.value = false
+    }
 }
 
 const cargarEmpleados = async (servicioId) => {
-  if (!servicioId) {
-    empleados.value = []
-    form.empleado_id = ''
-    limpiarDisponibilidad()
-    return
-  }
-
-  loadingEmpleados.value = true
-
-  try {
-    const response = await getEmpleadosPorServicio(servicioId)
-    empleados.value = response?.data ?? response ?? []
-
-    const existeEmpleadoSeleccionado = empleados.value.some(
-      (empleado) => Number(empleado.id) === Number(form.empleado_id),
-    )
-
-    if (!existeEmpleadoSeleccionado) {
-      form.empleado_id = ''
+    if (!servicioId) {
+        empleados.value = []
+        form.empleado_id = ''
+        limpiarDisponibilidad()
+        return
     }
-  } catch (err) {
-    console.error('Error cargando empleados:', err.response?.data || err)
-    empleados.value = []
-    form.empleado_id = ''
-  } finally {
-    loadingEmpleados.value = false
-  }
+
+    loadingEmpleados.value = true
+
+    try {
+        const response = await getEmpleadosPorServicio(servicioId)
+        empleados.value = response?.data ?? response ?? []
+
+        const existeEmpleadoSeleccionado = empleados.value.some(
+            (empleado) => Number(empleado.id) === Number(form.empleado_id),
+        )
+
+        if (!existeEmpleadoSeleccionado) {
+            form.empleado_id = ''
+        }
+    } catch (err) {
+        console.error('Error cargando empleados:', err.response?.data || err)
+        empleados.value = []
+        form.empleado_id = ''
+    } finally {
+        loadingEmpleados.value = false
+    }
 }
 
 watch(
-  () => form.servicio_id,
-  async (newId, oldId) => {
-    if (newId !== oldId) {
-      limpiarDisponibilidad()
+    () => form.servicio_id,
+    async (newId, oldId) => {
+        if (newId !== oldId) {
+        limpiarDisponibilidad()
     }
     await cargarEmpleados(newId)
   },
 )
 
 watch(
-  () => form.empleado_id,
-  () => {
-    limpiarDisponibilidad()
-  },
+    () => form.empleado_id,
+    () => {
+        limpiarDisponibilidad()
+    },
 )
 
 watch(
-  () => form.fecha,
-  () => {
-    limpiarDisponibilidad()
-  },
+    () => form.fecha,
+    () => {
+        limpiarDisponibilidad()
+    },
 )
 
 const limpiarErroresFormulario = () => {
-  errores.servicio_id = ''
-  errores.fecha = ''
-  errores.hora = ''
+    errores.servicio_id = ''
+    errores.fecha = ''
+    errores.hora = ''
 }
 
 const validarConsultaDisponibilidad = () => {
-  limpiarErroresFormulario()
+    limpiarErroresFormulario()
 
-  if (!form.servicio_id) {
-    errores.servicio_id = 'Debes seleccionar un servicio.'
-  }
+    if (!form.servicio_id) {
+        errores.servicio_id = 'Debes seleccionar un servicio.'
+    }
 
-  if (!form.fecha) {
-    errores.fecha = 'Debes seleccionar una fecha.'
-  }
+    if (!form.fecha) {
+        errores.fecha = 'Debes seleccionar una fecha.'
+    }
 
-  return !errores.servicio_id && !errores.fecha
+    return !errores.servicio_id && !errores.fecha
 }
 
 const validarReserva = () => {
-  const consultaValida = validarConsultaDisponibilidad()
+    const consultaValida = validarConsultaDisponibilidad()
 
-  if (!form.hora) {
-    errores.hora = 'Debes seleccionar una hora disponible.'
-  }
+    if (!form.hora) {
+        errores.hora = 'Debes seleccionar una hora disponible.'
+    }
 
-  return consultaValida && !errores.hora
+    return consultaValida && !errores.hora
 }
 
 const normalizarDisponibilidad = (data) => {
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.slots_disponibles)) return data.slots_disponibles
-  if (Array.isArray(data?.horas)) return data.horas
-  if (Array.isArray(data?.data)) return data.data
-  return []
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.slots_disponibles)) return data.slots_disponibles
+    if (Array.isArray(data?.horas)) return data.horas
+    if (Array.isArray(data?.data)) return data.data
+    return []
 }
 
 const consultarDisponibilidad = async () => {
-  error.value = null
-  success.value = null
-  disponibilidad.value = []
-  disponibilidadConsultada.value = false
-  form.hora = ''
+    error.value = null
+    success.value = null
+    disponibilidad.value = []
+    disponibilidadConsultada.value = false
+    form.hora = ''
 
-  const esValido = validarConsultaDisponibilidad()
+    const esValido = validarConsultaDisponibilidad()
 
-  if (!esValido) {
-    error.value = 'Revisa los campos obligatorios antes de consultar la disponibilidad.'
-    return
-  }
+    if (!esValido) {
+        error.value = 'Revisa los campos obligatorios antes de consultar la disponibilidad.'
+        return
+    }
 
-  loadingDisponibilidad.value = true
+    loadingDisponibilidad.value = true
 
-  try {
-    const data = await getDisponibilidad({
-      servicio_id: Number(form.servicio_id),
-      fecha: form.fecha,
-      empleado_id: form.empleado_id ? Number(form.empleado_id) : undefined,
-    })
+    try {
+        const data = await getDisponibilidad({
+            servicio_id: Number(form.servicio_id),
+            fecha: form.fecha,
+            empleado_id: form.empleado_id ? Number(form.empleado_id) : undefined,
+        })
 
-    disponibilidad.value = normalizarDisponibilidad(data)
-    disponibilidadConsultada.value = true
-  } catch (err) {
-    console.error(err.response?.data || err)
-    error.value = err.response?.data?.message || 'No se pudo consultar la disponibilidad.'
-    disponibilidadConsultada.value = true
-  } finally {
-    loadingDisponibilidad.value = false
-  }
+        disponibilidad.value = normalizarDisponibilidad(data)
+        disponibilidadConsultada.value = true
+    } catch (err) {
+        console.error(err.response?.data || err)
+        error.value = err.response?.data?.message || 'No se pudo consultar la disponibilidad.'
+        disponibilidadConsultada.value = true
+    } finally {
+        loadingDisponibilidad.value = false
+    }
 }
 
 const construirFechaHoraInicio = () => {
-  return `${form.fecha} ${form.hora}:00`
+    return `${form.fecha} ${form.hora}:00`
 }
 
 const submit = async () => {
-  error.value = null
-  success.value = null
+    error.value = null
+    success.value = null
 
-  const esValido = validarReserva()
+    const esValido = validarReserva()
 
-  if (!esValido) {
-    error.value = 'Completa los campos obligatorios para confirmar la reserva.'
-    return
-  }
-
-  loadingReserva.value = true
-
-  try {
-    const payload = {
-      usuario_id: auth.user?.id,
-      servicio_id: Number(form.servicio_id),
-      empleado_id: form.empleado_id ? Number(form.empleado_id) : null,
-      fecha_hora_inicio: construirFechaHoraInicio(),
-      notas: form.notas?.trim() || null,
+    if (!esValido) {
+        error.value = 'Completa los campos obligatorios para confirmar la reserva.'
+        return
     }
 
-    await crearReserva(payload)
+    loadingReserva.value = true
 
-    success.value = 'Reserva creada correctamente.'
+    try {
+        const payload = {
+            usuario_id: auth.user?.id,
+            servicio_id: Number(form.servicio_id),
+            empleado_id: form.empleado_id ? Number(form.empleado_id) : null,
+            fecha_hora_inicio: construirFechaHoraInicio(),
+            notas: form.notas?.trim() || null,
+        }
 
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 1200)
-  } catch (err) {
-    const errors = err.response?.data?.errors
+        await crearReserva(payload)
 
-    if (errors) {
-      error.value = Object.values(errors).flat().join(' | ')
-    } else {
-      error.value = err.response?.data?.message || 'No se pudo crear la reserva.'
+        success.value = 'Reserva creada correctamente.'
+
+        setTimeout(() => {
+            router.push('/dashboard')
+        }, 1200)
+    } catch (err) {
+        const errors = err.response?.data?.errors
+
+        if (errors) {
+            error.value = Object.values(errors).flat().join(' | ')
+        } else {
+            error.value = err.response?.data?.message || 'No se pudo crear la reserva.'
+        }
+
+        console.error(err.response?.data || err)
+    } finally {
+        loadingReserva.value = false
     }
-
-    console.error(err.response?.data || err)
-  } finally {
-    loadingReserva.value = false
-  }
 }
 
 onMounted(async () => {
-  await cargarServicios()
+    await cargarServicios()
 
-  if (form.servicio_id) {
-    await cargarEmpleados(form.servicio_id)
-  }
+    if (form.servicio_id) {
+        await cargarEmpleados(form.servicio_id)
+    }
 })
 </script>
 
 <template>
-  <main class="booking-form">
-    <section class="booking-form__container" aria-labelledby="booking-form-title">
-      <header class="booking-form__header">
-        <h1 id="booking-form-title" class="booking-form__title">
-          Nueva reserva
-        </h1>
-        <p class="booking-form__intro">
-          Selecciona el servicio, el día y una hora disponible.
-        </p>
-      </header>
+    <main class="booking-form">
+        <section class="booking-form__container" aria-labelledby="booking-form-title">
+            <header class="booking-form__header">
+                <h1 id="booking-form-title" class="booking-form__title">
+                    Nueva reserva
+                </h1>
+                <p class="booking-form__intro">
+                    Selecciona el servicio, el día y una hora disponible.
+                </p>
+            </header>
 
-      <StatusMessage
-        v-if="loadingServicios"
-        variant="default"
-        role="status"
-        live="polite"
-      >
-        Cargando datos...
-      </StatusMessage>
+            <StatusMessage
+                v-if="loadingServicios"
+                variant="default"
+                role="status"
+                live="polite"
+            >
+                Cargando datos...
+            </StatusMessage>
 
-      <StatusMessage
-        v-if="error"
-        variant="error"
-        role="alert"
-        live="assertive"
-      >
-        {{ error }}
-      </StatusMessage>
+            <StatusMessage
+                v-if="error"
+                variant="error"
+                role="alert"
+                live="assertive"
+            >
+                {{ error }}
+            </StatusMessage>
 
-      <StatusMessage
-        v-if="success"
-        variant="success"
-        role="status"
-        live="polite"
-      >
-        {{ success }}
-      </StatusMessage>
+            <StatusMessage
+                v-if="success"
+                variant="success"
+                role="status"
+                live="polite"
+            >
+                {{ success }}
+            </StatusMessage>
 
-      <form
-        class="booking-form__form"
-        @submit.prevent="submit"
-        :aria-busy="loadingReserva ? 'true' : 'false'"
-        novalidate
-      >
-        <BookingServiceSelect
-          v-model="form.servicio_id"
-          :servicios="servicios"
-          :error="errores.servicio_id"
-        />
+            <form
+                class="booking-form__form"
+                @submit.prevent="submit"
+                :aria-busy="loadingReserva ? 'true' : 'false'"
+                novalidate
+            >
+                <BookingServiceSelect
+                    v-model="form.servicio_id"
+                    :servicios="servicios"
+                    :error="errores.servicio_id"
+                />
 
-        <BookingServiceSummary
-          :servicio="servicioSeleccionado"
-        />
+                <BookingServiceSummary
+                    :servicio="servicioSeleccionado"
+                />
 
-        <BookingEmployeeSelect
-          v-model="form.empleado_id"
-          :empleados="empleados"
-          :loading="loadingEmpleados"
-          :get-employee-name="nombreEmpleado"
-        />
+                <BookingEmployeeSelect
+                    v-model="form.empleado_id"
+                    :empleados="empleados"
+                    :loading="loadingEmpleados"
+                    :get-employee-name="nombreEmpleado"
+                />
 
-        <div class="booking-form__field">
-          <label class="booking-form__label" for="fecha">Fecha</label>
-          <input
-            id="fecha"
-            v-model="form.fecha"
-            class="booking-form__input"
-            type="date"
-            required
-            :aria-invalid="errores.fecha ? 'true' : 'false'"
-            :aria-describedby="errores.fecha ? 'fecha-error' : 'fecha-help'"
-          />
+                <div class="booking-form__field">
+                    <label class="booking-form__label" for="fecha">Fecha</label>
+                    <input
+                        id="fecha"
+                        v-model="form.fecha"
+                        class="booking-form__input"
+                        type="date"
+                        required
+                        :aria-invalid="errores.fecha ? 'true' : 'false'"
+                        :aria-describedby="errores.fecha ? 'fecha-error' : 'fecha-help'"
+                    />
 
-          <p id="fecha-help" class="booking-form__help">
-            Selecciona una fecha para consultar la disponibilidad.
-          </p>
+                    <p id="fecha-help" class="booking-form__help">
+                        Selecciona una fecha para consultar la disponibilidad.
+                    </p>
 
-          <p
-            v-if="errores.fecha"
-            id="fecha-error"
-            class="booking-form__field-error"
-            aria-live="polite"
-          >
-            {{ errores.fecha }}
-          </p>
-        </div>
+                    <p
+                        v-if="errores.fecha"
+                        id="fecha-error"
+                        class="booking-form__field-error"
+                        aria-live="polite"
+                    >
+                        {{ errores.fecha }}
+                    </p>
+                </div>
 
-        <div class="booking-form__actions booking-form__actions--full">
-          <button
-            type="button"
-            class="booking-form__button booking-form__button--secondary"
-            @click="consultarDisponibilidad"
-            :disabled="loadingDisponibilidad"
-            :aria-busy="loadingDisponibilidad ? 'true' : 'false'"
-          >
-            {{ loadingDisponibilidad ? 'Consultando...' : 'Consultar disponibilidad' }}
-          </button>
-        </div>
+                <div class="booking-form__actions booking-form__actions--full">
+                    <button
+                        type="button"
+                        class="booking-form__button booking-form__button--secondary"
+                        @click="consultarDisponibilidad"
+                        :disabled="loadingDisponibilidad"
+                        :aria-busy="loadingDisponibilidad ? 'true' : 'false'"
+                    >
+                        {{ loadingDisponibilidad ? 'Consultando...' : 'Consultar disponibilidad' }}
+                    </button>
+                </div>
 
-        <BookingTimeSlots
-          v-model="form.hora"
-          :disponibilidad="disponibilidad"
-          :error="errores.hora"
-        />
+                <BookingTimeSlots
+                    v-model="form.hora"
+                    :disponibilidad="disponibilidad"
+                    :error="errores.hora"
+                />
 
-        <div
-          v-if="!disponibilidad.length && disponibilidadConsultada && !loadingDisponibilidad"
-          class="booking-form__empty"
-          role="status"
-          aria-live="polite"
-        >
-          No hay horas disponibles para esa fecha.
-        </div>
+                <div
+                    v-if="!disponibilidad.length && disponibilidadConsultada && !loadingDisponibilidad"
+                    class="booking-form__empty"
+                    role="status"
+                    aria-live="polite"
+                >
+                    No hay horas disponibles para esa fecha.
+                </div>
 
-        <div class="booking-form__field booking-form__field--full">
-          <label class="booking-form__label" for="notas">Notas</label>
-          <textarea
-            id="notas"
-            v-model="form.notas"
-            class="booking-form__textarea"
-            rows="4"
-            placeholder="Añade una nota para tu reserva"
-          ></textarea>
-        </div>
+                <div class="booking-form__field booking-form__field--full">
+                    <label class="booking-form__label" for="notas">Notas</label>
+                    <textarea
+                        id="notas"
+                        v-model="form.notas"
+                        class="booking-form__textarea"
+                        rows="4"
+                        placeholder="Añade una nota para tu reserva"
+                    ></textarea>
+                </div>
 
-        <div class="booking-form__actions booking-form__actions--full">
-          <button
-            type="submit"
-            class="booking-form__button booking-form__button--primary"
-            :disabled="loadingReserva"
-            :aria-busy="loadingReserva ? 'true' : 'false'"
-          >
-            {{ loadingReserva ? 'Guardando reserva...' : 'Confirmar reserva' }}
-          </button>
-        </div>
-      </form>
-    </section>
-  </main>
+                <div class="booking-form__actions booking-form__actions--full">
+                    <button
+                        type="submit"
+                        class="booking-form__button booking-form__button--primary"
+                        :disabled="loadingReserva"
+                        :aria-busy="loadingReserva ? 'true' : 'false'"
+                    >
+                        {{ loadingReserva ? 'Guardando reserva...' : 'Confirmar reserva' }}
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
 </template>

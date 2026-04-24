@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { getReservas, cancelarReserva } from '../api/reservas'
 
+import StatusMessage from '@/components/feedback/StatusMessage.vue'
+import ReservationCard from '@/components/reservations/ReservationCard.vue'
+
 const reservas = ref([])
 const loading = ref(false)
 const error = ref(null)
@@ -42,41 +45,21 @@ const cancelarReservaLocal = async (reservaId, reservaNombre) => {
     }
 }
 
-const ahora = computed(() => new Date())
-
 const reservasFuturas = computed(() => {
+    const ahora = new Date()
+
     return reservas.value.filter((reserva) => {
-        return new Date(reserva.fecha_hora_inicio) >= ahora.value
+        return new Date(reserva.fecha_hora_inicio) >= ahora
     })
 })
 
 const reservasPasadas = computed(() => {
+    const ahora = new Date()
+
     return reservas.value.filter((reserva) => {
-        return new Date(reserva.fecha_hora_inicio) < ahora.value
+        return new Date(reserva.fecha_hora_inicio) < ahora
     })
 })
-
-const formatearFecha = (fecha) => {
-    return new Intl.DateTimeFormat('es-ES', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(fecha))
-}
-
-const nombreEmpleado = (reserva) => {
-    const usuario = reserva.empleado?.usuario
-    if (!usuario) return 'Sin profesional asignado'
-    return `${usuario.nombre} ${usuario.apellidos}`
-}
-
-const estadoReserva = (estado) => {
-    if (!estado) return 'Pendiente'
-    return estado
-}
-
-const puedeCancelar = (reserva) => {
-    return reserva.estado === 'pendiente' && new Date(reserva.fecha_hora_inicio) > new Date()
-}
 
 onMounted(cargarReservas)
 </script>
@@ -85,38 +68,40 @@ onMounted(cargarReservas)
     <main class="reservations-page">
         <section class="reservations-page__container" aria-labelledby="reservations-title">
             <header class="reservations-page__header">
-                <h1 id="reservations-title" class="reservations-page__title">Mis reservas</h1>
+                <h1 id="reservations-title" class="reservations-page__title">
+                    Mis reservas
+                </h1>
                 <p class="reservations-page__intro">
                     Consulta tus próximas citas y el historial de reservas.
-                </p>    
+                </p>
             </header>
 
-            <p
+            <StatusMessage
                 v-if="loading"
-                class="reservations-page__status"
+                variant="default"
                 role="status"
-                aria-live="polite"
+                live="polite"
             >
                 Cargando reservas...
-            </p>
+            </StatusMessage>
 
-            <p
+            <StatusMessage
                 v-if="error"
-                class="reservations-page__message reservations-page__message--error"
+                variant="error"
                 role="alert"
-                aria-live="assertive"
+                live="assertive"
             >
                 {{ error }}
-            </p>
+            </StatusMessage>
 
-            <p
+            <StatusMessage
                 v-if="success"
-                class="reservations-page__message reservations-page__message--success"
+                variant="success"
                 role="status"
-                aria-live="polite"
+                live="polite"
             >
                 {{ success }}
-            </p>
+            </StatusMessage>
 
             <template v-if="!loading && !error">
                 <section class="reservations-page__section" aria-labelledby="upcoming-title">
@@ -125,60 +110,13 @@ onMounted(cargarReservas)
                     </h2>
 
                     <div v-if="reservasFuturas.length" class="reservations-page__list">
-                        <article
+                        <ReservationCard
                             v-for="reserva in reservasFuturas"
                             :key="reserva.id"
-                            class="reservation-card"
-                            :aria-labelledby="`reservation-title-${reserva.id}`"
-                        >
-                            <h3
-                                :id="`reservation-title-${reserva.id}`"
-                                class="reservation-card__title"
-                            >
-                                {{ reserva.servicio?.nombre || 'Servicio' }}
-                            </h3>
-
-                            <dl class="reservation-card__meta">
-                                <div class="reservation-card__meta-item">
-                                    <dt>Fecha</dt>
-                                    <dd>
-                                        <time :datetime="reserva.fecha_hora_inicio">
-                                            {{ formatearFecha(reserva.fecha_hora_inicio) }}
-                                        </time>
-                                    </dd>
-                                </div>
-
-                                <div class="reservation-card__meta-item">
-                                    <dt>Profesional</dt>
-                                    <dd>{{ nombreEmpleado(reserva) }}</dd>
-                                </div>
-
-                                <div class="reservation-card__meta-item">
-                                    <dt>Estado</dt>
-                                    <dd>
-                                        <span class="reservation-card__status">
-                                            {{ estadoReserva(reserva.estado) }}
-                                        </span>
-                                    </dd>
-                                </div>
-                            </dl>
-
-                            <p v-if="reserva.notas" class="reservation-card__notes">
-                                {{ reserva.notas }}
-                            </p>
-
-                            <div class="reservation-card__actions">
-                                <button
-                                    v-if="puedeCancelar(reserva)"
-                                    class="reservation-card__cancel"
-                                    @click="cancelarReservaLocal(reserva.id, reserva.servicio?.nombre || 'esta reserva')"
-                                    :aria-label="`Cancelar reserva ${reserva.servicio?.nombre || ''}`"
-                                    :disabled="cancelandoId === reserva.id"
-                                >
-                                    {{ cancelandoId === reserva.id ? 'Cancelando...' : 'Cancelar' }}
-                                </button>
-                            </div>
-                        </article>
+                            :reserva="reserva"
+                            :cancelando-id="cancelandoId"
+                            @cancel="cancelarReservaLocal"
+                        />
                     </div>
 
                     <p v-else class="reservations-page__empty" role="status" aria-live="polite">
@@ -192,48 +130,12 @@ onMounted(cargarReservas)
                     </h2>
 
                     <div v-if="reservasPasadas.length" class="reservations-page__list">
-                        <article
+                        <ReservationCard
                             v-for="reserva in reservasPasadas"
                             :key="reserva.id"
-                            class="reservation-card reservation-card--past"
-                            :aria-labelledby="`reservation-history-title-${reserva.id}`"
-                        >
-                            <h3
-                                :id="`reservation-history-title-${reserva.id}`"
-                                class="reservation-card__title"
-                            >
-                                {{ reserva.servicio?.nombre || 'Servicio' }}
-                            </h3>
-
-                            <dl class="reservation-card__meta">
-                                <div class="reservation-card__meta-item">
-                                    <dt>Fecha</dt>
-                                    <dd>
-                                        <time :datetime="reserva.fecha_hora_inicio">
-                                            {{ formatearFecha(reserva.fecha_hora_inicio) }}
-                                        </time>
-                                    </dd>
-                                </div>
-
-                                <div class="reservation-card__meta-item">
-                                    <dt>Profesional</dt>
-                                    <dd>{{ nombreEmpleado(reserva) }}</dd>
-                                </div>
-
-                                <div class="reservation-card__meta-item">
-                                    <dt>Estado</dt>
-                                    <dd>
-                                        <span class="reservation-card__status">
-                                            {{ estadoReserva(reserva.estado) }}
-                                        </span>
-                                    </dd>
-                                </div>
-                            </dl>
-
-                            <p v-if="reserva.notas" class="reservation-card__notes">
-                                {{ reserva.notas }}
-                            </p>
-                        </article>
+                            :reserva="reserva"
+                            past
+                        />
                     </div>
 
                     <p v-else class="reservations-page__empty" role="status" aria-live="polite">
