@@ -1,15 +1,15 @@
-.app-header {
+@use '../abstracts' as *;
+
+.header {
   position: sticky;
   top: 0;
   z-index: 40;
   border-bottom: 1px solid var(--color-border);
   background-color: color-mix(in srgb, var(--color-surface) 92%, white);
-  //backdrop-filter: blur(10px);
   box-shadow: var(--shadow-sm);
 
   &__container {
     width: 100%;
-    //max-width: 72rem;
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -23,7 +23,7 @@
     align-items: center;
     min-height: 2.75rem;
     color: var(--color-text);
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 2vw, 1.25rem);
     font-weight: 800;
     line-height: 1.2;
     text-decoration: none;
@@ -59,13 +59,13 @@
       box-shadow 180ms ease;
 
     &:hover {
-      background-color: var(--color-interactive-hover);
+      background-color: var(--color-surface-offset);
     }
 
     &[aria-pressed='true'] {
-      border-color: var(--color-interactive-active-border);
-      background-color: var(--color-interactive-active);
-      color: var(--color-interactive-active-text);
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-highlight);
+      color: var(--color-primary);
     }
   }
 
@@ -103,10 +103,24 @@
       border-color 180ms ease,
       color 180ms ease,
       transform 180ms ease;
-  }
 
-  &__menu-button:hover {
-    background-color: var(--color-interactive-hover);
+    &:hover {
+      background-color: var(--color-surface-offset);
+    }
+
+    &[aria-expanded='true'] {
+      .header__menu-button-line:nth-child(1) {
+        transform: rotate(45deg) translate(0.375rem, 0.375rem);
+      }
+
+      .header__menu-button-line:nth-child(2) {
+        opacity: 0;
+      }
+
+      .header__menu-button-line:nth-child(3) {
+        transform: rotate(-45deg) translate(0.375rem, -0.375rem);
+      }
+    }
   }
 
   &__menu-button-line {
@@ -115,6 +129,9 @@
     height: 0.125rem;
     border-radius: 9999px;
     background-color: currentColor;
+    transition:
+      transform 180ms ease,
+      opacity 180ms ease;
   }
 
   &__nav {
@@ -162,32 +179,46 @@
       box-shadow 180ms ease;
 
     &:hover {
-      background-color: var(--color-interactive-hover);
+      background-color: var(--color-surface-offset);
     }
 
     &[aria-current='page'] {
-      border-color: var(--color-interactive-active-border);
-      background-color: var(--color-interactive-active);
-      color: var(--color-interactive-active-text);
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-highlight);
+      color: var(--color-primary);
     }
   }
 
-  &__brand:focus-visible,
-  &__theme-toggle:focus-visible,
-  &__menu-button:focus-visible,
-  &__link:focus-visible {
-    outline: 3px solid var(--color-focus, var(--focus-ring));
-    outline-offset: 3px;
+  // Mobile ultra pequeño: stack vertical (320-375)
+  @media (max-width: 420px) {
+    &__container {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    &__controls {
+      justify-content: space-between;
+    }
   }
 
-  @media (min-width: 768px) {
+  // Móviles grandes: mejor padding
+  @include respond-up(sm) {
+    &__container {
+      padding: var(--space-5);
+    }
+  }
+
+  // Tablet: navegación horizontal
+  @include respond-up(md) {
     &__container {
       grid-template-columns: auto auto 1fr;
       padding: var(--space-4) var(--space-6);
+      gap: var(--space-6);
     }
 
     &__controls {
       justify-self: start;
+      gap: var(--space-3);
     }
 
     &__menu-button {
@@ -198,7 +229,6 @@
       display: block;
       grid-column: auto;
       width: auto;
-      margin-left: auto;
     }
 
     &__list {
@@ -207,12 +237,11 @@
       flex-wrap: wrap;
       justify-content: flex-end;
       align-items: center;
-      gap: var(--space-2);
+      gap: var(--space-3);
       width: auto;
     }
 
     &__item {
-      display: flex;
       width: auto;
       flex: 0 0 auto;
     }
@@ -221,20 +250,26 @@
       width: auto;
       justify-content: center;
       white-space: nowrap;
+      padding: 0 var(--space-5);
     }
   }
 
-  @media (max-width: 420px) {
+  // Laptop pequeña: más espacio
+  @include respond-up(lg) {
     &__container {
-      grid-template-columns: 1fr;
+      padding: var(--space-5) var(--space-8);
+      gap: var(--space-8);
     }
 
-    &__controls {
-      justify-content: space-between;
+    &__list {
+      gap: var(--space-4);
     }
+  }
 
-    &__theme-toggle {
-      flex: 1 1 auto;
+  // Desktop: refinamiento
+  @include respond-up(xl) {
+    &__container {
+      padding: var(--space-6) var(--space-10);
     }
   }
 }
