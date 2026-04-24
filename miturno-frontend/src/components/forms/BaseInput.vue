@@ -28,6 +28,10 @@ const props = defineProps({
         type: String,
         default: undefined,
     },
+    placeholder: {
+        type: String,
+        default: '',
+    },
     error: {
         type: String,
         default: '',
@@ -55,6 +59,7 @@ const errorId = `${props.id}-error`
             :type="type"
             :value="modelValue"
             v-bind="attrs"
+            :placeholder="placeholder"
             class="form-field__input"
             :class="{ 'form-field__input--error': error }"
             :autocomplete="autocomplete"

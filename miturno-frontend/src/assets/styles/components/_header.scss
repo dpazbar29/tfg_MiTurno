@@ -189,7 +189,6 @@
     }
   }
 
-  // Mobile ultra pequeño: stack vertical (320-375)
   @media (max-width: 420px) {
     &__container {
       grid-template-columns: 1fr;
@@ -201,14 +200,12 @@
     }
   }
 
-  // Móviles grandes: mejor padding
   @include respond-up(sm) {
     &__container {
       padding: var(--space-5);
     }
   }
 
-  // Tablet: navegación horizontal
   @include respond-up(md) {
     &__container {
       grid-template-columns: auto auto 1fr;
@@ -254,7 +251,6 @@
     }
   }
 
-  // Laptop pequeña: más espacio
   @include respond-up(lg) {
     &__container {
       padding: var(--space-5) var(--space-8);
@@ -266,7 +262,6 @@
     }
   }
 
-  // Desktop: refinamiento
   @include respond-up(xl) {
     &__container {
       padding: var(--space-6) var(--space-10);

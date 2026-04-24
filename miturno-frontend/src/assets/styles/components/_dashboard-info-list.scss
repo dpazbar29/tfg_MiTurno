@@ -1,0 +1,27 @@
+.dashboard-info-list {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+
+  &__item {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-soft);
+  }
+
+  &__label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    margin: 0;
+    color: var(--color-text);
+  }
+}
