@@ -16,19 +16,47 @@
     color: var(--color-text);
   }
 
+  &--wide {
+    max-width: 40rem;
+  }
+
   @include respond-up(sm) {
     padding: var(--space-8);
   }
 
   @include respond-up(md) {
-    max-width: 32rem;
+    max-width: 34rem;
 
     &__title {
       margin-bottom: var(--space-8);
     }
+
+    &--wide {
+      max-width: 42rem;
+    }
   }
 
   @include respond-up(lg) {
-    max-width: 34rem;
+    max-width: 36rem;
+
+    &--wide {
+      max-width: 44rem;
+    }
+  }
+
+  @include respond-up(xl) {
+    max-width: 38rem;
+
+    &--wide {
+      max-width: 46rem;
+    }
+  }
+
+  @include respond-up(2xl) {
+    max-width: 40rem;
+
+    &--wide {
+      max-width: 48rem;
+    }
   }
 }

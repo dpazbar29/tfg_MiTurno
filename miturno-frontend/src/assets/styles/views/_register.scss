@@ -1,107 +1,18 @@
-.register {
-  min-height: 90dvh;
+@use '../abstracts' as *;
+
+.register-form {
   display: grid;
-  place-items: center;
-  padding: var(--space-4);
-  background-color: var(--color-bg);
+  gap: var(--space-6);
 
-  &__container {
-    width: 100%;
-    max-width: 40rem;
-    padding: var(--space-6);
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-  }
-
-  &__title {
-    margin: 0 0 var(--space-6);
-    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
-    line-height: 1.2;
-    color: var(--color-text);
-  }
-
-  &__form {
+  &__fields,
+  &__credentials {
     display: grid;
-    gap: var(--space-5);
-  }
-
-  &__field {
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  &__label {
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  &__input {
-    min-height: 2.75rem;
-    padding: 0 var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background-color: var(--color-surface);
-    color: var(--color-text);
-
-    &::placeholder {
-      color: var(--color-text-muted);
-      opacity: 1;
-    }
-
-    &:focus-visible {
-      outline: 3px solid var(--color-focus);
-      outline-offset: 2px;
-      border-color: var(--color-primary);
-    }
-
-    &--error {
-      border-color: var(--color-error);
-      background-color: var(--color-error-bg);
-    }
-
-    &--error:focus-visible {
-      border-color: var(--color-error);
-      outline-color: var(--color-error);
-    }
-  }
-
-  &__field-error {
-    margin: 0;
-    padding-inline-start: var(--space-1);
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: var(--color-error);
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
 
   &__submit {
     min-height: 2.75rem;
-    padding: 0 var(--space-5);
-    border: 0;
-    border-radius: var(--radius-md);
-    background-color: var(--color-primary);
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-      background-color: var(--color-primary-hover);
-    }
-
-    &:focus-visible {
-      outline: 3px solid var(--color-focus);
-      outline-offset: 3px;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.7;
-    }
-
-    &--loading {
-      opacity: 0.85;
-    }
   }
 
   &__error {
@@ -135,30 +46,32 @@
     }
   }
 
-  @media (min-width: 480px) {
-    padding: var(--space-6);
+  @include respond-up(sm) {
+    gap: var(--space-8);
+  }
 
-    &__container {
-      padding: var(--space-8);
+  @include respond-up(md) {
+    &__fields {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+
+    &__credentials {
+      gap: var(--space-5);
     }
   }
 
-  @media (min-width: 768px) {
-    &__container {
-      max-width: 42rem;
-    }
-
-    &__form {
-      grid-template-columns: 1fr 1fr;
+  @include respond-up(lg) {
+    &__fields {
       gap: var(--space-6);
     }
 
-    &__field:has(#email),
-    &__field:has(#password),
-    &__field:has(#password_confirmation),
-    &__submit,
-    &__error {
-      grid-column: 1 / -1;
+    &__credentials {
+      gap: var(--space-6);
     }
+  }
+
+  @include respond-up(xl) {
+    gap: var(--space-8);
   }
 }

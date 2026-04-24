@@ -7,6 +7,7 @@ import * as yup from 'yup'
 
 import AuthCard from '@/components/auth/AuthCard.vue'
 import BaseInput from '@/components/forms/BaseInput.vue'
+import BaseButton from '@/components/forms/BaseButton.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -80,14 +81,14 @@ const submit = handleSubmit(async (values) => {
                 :error="errors.password"
             />
 
-            <button
+            <BaseButton
                 class="login-form__submit"
                 :class="{ 'login-form__submit--loading': auth.loading }"
                 type="submit"
                 :disabled="auth.loading"
             >
-                {{ auth.loading ? 'Entrando...' : 'Entrar' }}
-            </button>
+                {{ auth.loading ? 'Entrando' : 'Entrar' }}
+            </BaseButton>
 
             <p
                 v-if="auth.error"

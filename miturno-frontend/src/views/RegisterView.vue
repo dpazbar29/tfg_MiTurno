@@ -6,6 +6,10 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/yup'
 import * as yup from 'yup'
 
+import AuthCard from '@/components/auth/AuthCard.vue'
+import BaseInput from '@/components/forms/BaseInput.vue'
+import BaseButton from '@/components/forms/BaseButton.vue'
+
 const auth = useAuthStore()
 const router = useRouter()
 
@@ -77,8 +81,8 @@ const submit = handleSubmit(async (values) => {
         const message = auth.error || 'No se pudo completar el registro. Inténtalo de nuevo.'
 
         if (message.toLowerCase().includes('email') || message.toLowerCase().includes('correo')) {
-        setFieldError('email', message)
-        return
+            setFieldError('email', message)
+            return
         }
 
         console.error(error)
@@ -87,208 +91,117 @@ const submit = handleSubmit(async (values) => {
 </script>
 
 <template>
-    <main class="register">
-        <section class="register__container" aria-labelledby="register-title">
-            <h1 id="register-title" class="register__title">Crear cuenta</h1>
+    <AuthCard title="Crear cuenta">
+        <form
+            class="register-form"
+            @submit="submit"
+            :aria-busy="auth.loading || isSubmitting ? 'true' : 'false'"
+            novalidate
+        >
+            <div class="register-form__fields">
+                <BaseInput
+                    id="nombre"
+                    v-model="nombre"
+                    name="nombre"
+                    label="Nombre"
+                    autocomplete="given-name"
+                    :attrs="nombreAttrs"
+                    :error="errors.nombre"
+                />
 
-            <form class="register__form" @submit="submit" :aria-busy="auth.loading || isSubmitting ? 'true' : 'false'" novalidate>
-                <div class="register__field">
-                    <label class="register__label" for="nombre">Nombre</label>
-                    <input 
-                        id="nombre"
-                        v-model="nombre"
-                        v-bind="nombreAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.nombre }"
-                        type="text"
-                        name="nombre"
-                        autocomplete="given-name"
-                        :aria-invalid="errors.nombre ? 'true' : 'false'"
-                        :aria-describedby="errors.nombre ? 'nombre-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.nombre"
-                        id="nombre-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.nombre }}
-                    </p>
-                </div>
+                <BaseInput
+                    id="apellidos"
+                    v-model="apellidos"
+                    name="apellidos"
+                    label="Apellidos"
+                    autocomplete="family-name"
+                    :attrs="apellidosAttrs"
+                    :error="errors.apellidos"
+                />
 
-                <div class="register__field">
-                    <label class="register__label" for="apellidos">Apellidos</label>
-                    <input
-                        id="apellidos"
-                        v-model="apellidos"
-                        v-bind="apellidosAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.apellidos }"
-                        type="text"
-                        name="apellidos"
-                        autocomplete="family-name"
-                        :aria-invalid="errors.apellidos ? 'true' : 'false'"
-                        :aria-describedby="errors.apellidos ? 'apellidos-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.apellidos"
-                        id="apellidos-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.apellidos }}
-                    </p>
-                </div>
+                <BaseInput
+                    id="fecha_nacimiento"
+                    v-model="fechaNacimiento"
+                    name="fecha_nacimiento"
+                    label="Fecha de nacimiento"
+                    type="date"
+                    :attrs="fechaNacimientoAttrs"
+                    :error="errors.fecha_nacimiento"
+                />
 
-                <div class="register__field">
-                    <label class="register__label" for="fecha_nacimiento">Fecha de nacimiento</label>
-                    <input
-                        id="fecha_nacimiento"
-                        v-model="fechaNacimiento"
-                        v-bind="fechaNacimientoAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.fecha_nacimiento }"
-                        type="date"
-                        name="fecha_nacimiento"
-                        :aria-invalid="errors.fecha_nacimiento ? 'true' : 'false'"
-                        :aria-describedby="errors.fecha_nacimiento ? 'fecha-nacimiento-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.fecha_nacimiento"
-                        id="fecha-nacimiento-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.fecha_nacimiento }}
-                    </p>
-                </div>
+                <BaseInput
+                    id="telefono"
+                    v-model="telefono"
+                    name="telefono"
+                    label="Teléfono"
+                    type="tel"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    :attrs="telefonoAttrs"
+                    :error="errors.telefono"
+                />
+            </div>
 
-                <div class="register__field">
-                    <label class="register__label" for="telefono">Teléfono</label>
-                    <input
-                        id="telefono"
-                        v-model="telefono"
-                        v-bind="telefonoAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.telefono }"
-                        type="tel"
-                        name="telefono"
-                        autocomplete="tel"
-                        inputmode="tel"
-                        :aria-invalid="errors.telefono ? 'true' : 'false'"
-                        :aria-describedby="errors.telefono ? 'telefono-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.telefono"
-                        id="telefono-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.telefono }}
-                    </p>
-                </div>
+            <div class="register-form__credentials">
+                <BaseInput
+                    id="email"
+                    v-model="email"
+                    name="email"
+                    label="Correo electrónico"
+                    type="email"
+                    autocomplete="email"
+                    inputmode="email"
+                    :attrs="emailAttrs"
+                    :error="errors.email"
+                />
 
-                <div class="register__field">
-                    <label class="register__label" for="email">Correo electrónico</label>
-                    <input
-                        id="email"
-                        v-model="email"
-                        v-bind="emailAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.email }"
-                        type="email"
-                        name="email"
-                        autocomplete="email"
-                        inputmode="email"
-                        :aria-invalid="errors.email ? 'true' : 'false'"
-                        :aria-describedby="errors.email ? 'email-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.email"
-                        id="email-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.email }}
-                    </p>
-                </div>
+                <BaseInput
+                    id="password"
+                    v-model="password"
+                    name="password"
+                    label="Contraseña"
+                    type="password"
+                    autocomplete="new-password"
+                    :attrs="passwordAttrs"
+                    :error="errors.password"
+                />
 
-                <div class="register__field">
-                    <label class="register__label" for="password">Contraseña</label>
-                    <input
-                        id="password"
-                        v-model="password"
-                        v-bind="passwordAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.password }"
-                        type="password"
-                        name="password"
-                        autocomplete="new-password"
-                        :aria-invalid="errors.password ? 'true' : 'false'"
-                        :aria-describedby="errors.password ? 'password-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.password"
-                        id="password-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.password }}
-                    </p>
-                </div>
+                <BaseInput
+                    id="password_confirmation"
+                    v-model="passwordConfirmation"
+                    name="password_confirmation"
+                    label="Confirmar contraseña"
+                    type="password"
+                    autocomplete="new-password"
+                    :attrs="passwordConfirmationAttrs"
+                    :error="errors.password_confirmation"
+                />
+            </div>
 
-                <div class="register__field">
-                    <label class="register__label" for="password_confirmation">
-                        Confirmar contraseña
-                    </label>
-                    <input
-                        id="password_confirmation"
-                        v-model="passwordConfirmation"
-                        v-bind="passwordConfirmationAttrs"
-                        class="register__input"
-                        :class="{ 'register__input--error': !!errors.password_confirmation }"
-                        type="password"
-                        name="password_confirmation"
-                        autocomplete="new-password"
-                        :aria-invalid="errors.password_confirmation ? 'true' : 'false'"
-                        :aria-describedby="errors.password_confirmation ? 'password-confirmation-error' : undefined"
-                    />
-                    <p
-                        v-if="errors.password_confirmation"
-                        id="password-confirmation-error"
-                        class="register__field-error"
-                        aria-live="polite"
-                    >
-                        {{ errors.password_confirmation }}
-                    </p>
-                </div>
-
-                <button
-                    class="register__submit"
-                    :class="{ 'register__submit--loading': auth.loading || isSubmitting }"
-                    type="submit"
-                    :disabled="auth.loading || isSubmitting"
-                >
+            <BaseButton
+                class="register-form__submit"
+                :loading="auth.loading || isSubmitting"
+                :disabled="auth.loading || isSubmitting"
+            >
                 {{ auth.loading || isSubmitting ? 'Creando cuenta...' : 'Registrarse' }}
-                </button>
+            </BaseButton>
 
-                <p
-                    v-if="hasServerError && !errors.email"
-                    id="register-error"
-                    class="register__error"
-                    role="alert"
-                    aria-live="assertive"
-                >
+            <p
+                v-if="hasServerError && !errors.email"
+                id="register-error"
+                class="register-form__error"
+                role="alert"
+                aria-live="assertive"
+            >
                 {{ auth.error }}
-                </p>
-            </form>
-
-            <p class="register__footer">
-                ¿Ya tienes cuenta?
-                <RouterLink class="register__link" to="/login">
-                Inicia sesión
-                </RouterLink>
             </p>
-        </section>
-    </main>
+        </form>
+
+        <p class="register-form__footer">
+            ¿Ya tienes cuenta?
+            <RouterLink class="register-form__link" to="/login">
+                Inicia sesión
+            </RouterLink>
+        </p>
+    </AuthCard>
 </template>

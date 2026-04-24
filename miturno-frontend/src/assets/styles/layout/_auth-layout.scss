@@ -14,4 +14,12 @@
   @include respond-up(md) {
     padding: var(--space-8);
   }
+
+  @include respond-up(xl) {
+    padding: var(--space-10);
+  }
+
+  @include respond-up(2xl) {
+    padding: var(--space-12);
+  }
 }
