@@ -1,0 +1,206 @@
+@use '../abstracts' as *;
+
+.admin-employees-form {
+  display: grid;
+  gap: var(--space-5);
+
+  &__field {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+
+    &--checkbox {
+      gap: var(--space-3);
+    }
+  }
+
+  &__label {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__group {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-soft);
+    min-inline-size: 0;
+  }
+
+  &__legend {
+    padding: 0 var(--space-2);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__options {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  &__option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+
+  &__checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+
+  &__checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  &__input,
+  &__textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+
+  &__input {
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+  }
+
+  &__textarea {
+    min-height: 7rem;
+    padding: var(--space-3) var(--space-4);
+    resize: vertical;
+  }
+
+  &__input--error,
+  &__textarea--error {
+    border-color: var(--color-error);
+    background-color: var(--color-error-bg);
+  }
+
+  &__error {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-error);
+  }
+
+  &__empty {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    min-width: 10rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+
+  &__button--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary-hover);
+    }
+  }
+
+  &__button--secondary {
+    border-color: var(--color-interactive-secondary-border);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+  }
+
+  @include respond-up(md) {
+    &__actions {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+
+    &__field--checkbox {
+      gap: var(--space-3);
+    }
+  }
+
+  @include respond-up(lg) {
+    &__field {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-employees-form__button,
+  .admin-employees-form__input,
+  .admin-employees-form__textarea,
+  .admin-employees-form__checkbox {
+    transition: none;
+  }
+}
