@@ -6,6 +6,7 @@ import { getServicios } from '../../api/servicios'
 import EmployeeCard from '../../components/admin/employees/EmployeeCard.vue'
 import EmployeeServicesModal from '../../components/admin/employees/EmployeeServicesModal.vue'
 import EmployeeProfileModal from '../../components/admin/employees/EmployeeProfileModal.vue'
+import StatusMessage from '../../components/feedback/StatusMessage.vue'
 
 const empleados = ref([])
 const servicios = ref([])
@@ -211,32 +212,32 @@ onMounted(cargarDatos)
                 </div>
             </header>
 
-            <p
+            <StatusMessage
                 v-if="loading"
-                class="admin-employees__status"
+                variant="default"
                 role="status"
-                aria-live="polite"
+                live="polite"
             >
                 Cargando empleados...
-            </p>
+            </StatusMessage>
 
-            <p
+            <StatusMessage
                 v-if="error"
-                class="admin-employees__message admin-employees__message--error"
+                variant="error"
                 role="alert"
-                aria-live="assertive"
+                live="assertive"
             >
                 {{ error }}
-            </p>
+            </StatusMessage>
 
-            <p
+            <StatusMessage
                 v-if="success"
-                class="admin-employees__message admin-employees__message--success"
+                variant="success"
                 role="status"
-                aria-live="polite"
+                live="polite"
             >
                 {{ success }}
-            </p>
+            </StatusMessage>
 
             <div
                 v-if="!loading && empleadosDisponibles.length"

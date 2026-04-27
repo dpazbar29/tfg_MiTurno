@@ -1,0 +1,210 @@
+@use '../abstracts' as *;
+
+.admin-schedules-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-surface-overlay);
+
+  &__dialog {
+    width: min(100%, 44rem);
+    max-height: min(90dvh, 48rem);
+    overflow: auto;
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-lg);
+
+    @include respond-up(md) {
+      padding: var(--space-8);
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  &__heading {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__description {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-interactive-secondary-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+}
+
+.admin-schedules-form {
+  display: grid;
+  gap: var(--space-5);
+
+  &__field {
+    display: grid;
+    gap: var(--space-2);
+
+    &--checkbox {
+      gap: var(--space-3);
+    }
+  }
+
+  &__label {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &--error {
+      border-color: var(--color-error);
+      background-color: var(--color-error-bg);
+    }
+  }
+
+  &__checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  &__checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: 0;
+    accent-color: var(--color-primary);
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-error);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+
+    @include respond-up(md) {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    min-width: 10rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &--primary {
+      background-color: var(--color-primary);
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-primary-hover);
+      }
+    }
+
+    &--secondary {
+      border-color: var(--color-interactive-secondary-border);
+      background-color: var(--color-interactive-secondary-bg);
+      color: var(--color-interactive-secondary-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-interactive-secondary-hover);
+      }
+    }
+  }
+}

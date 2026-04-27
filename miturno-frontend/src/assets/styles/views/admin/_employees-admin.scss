@@ -78,8 +78,8 @@
   }
 
   &__status,
-  &__empty,
-  &__message {
+  &__empty
+  {
     margin: 0;
     padding: var(--space-4);
     border-radius: var(--radius-md);
@@ -90,18 +90,6 @@
     border: 1px solid var(--color-border);
     background-color: var(--color-surface-soft);
     color: var(--color-text);
-  }
-
-  &__message--error {
-    border: 1px solid var(--color-error);
-    background-color: var(--color-error-bg);
-    color: var(--color-error);
-  }
-
-  &__message--success {
-    border: 1px solid var(--color-status-success-border);
-    background-color: var(--color-status-success-bg);
-    color: var(--color-status-success-text);
   }
 
   &__button {
