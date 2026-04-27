@@ -218,7 +218,7 @@ const handleClienteInput = (event) => {
                     :key="servicio.id"
                     :value="servicio.id"
                 >
-                    {{ servicio.nombre }} - {{ servicio.duracionminutos }} min - {{ servicio.precio }}
+                    {{ servicio.nombre }} - {{ servicio.duracionminutos || servicio.duracion_minutos }} min - {{ servicio.precio }}
                 </option>
             </select>
 
@@ -247,7 +247,7 @@ const handleClienteInput = (event) => {
             <dl class="create-reservation-form__summary-meta">
                 <div>
                     <dt>Duración</dt>
-                    <dd>{{ servicioSeleccionadoCrear.duracionminutos }} min</dd>
+                    <dd>{{ servicioSeleccionadoCrear.duracionminutos || servicioSeleccionadoCrear.duracion_minutos }} min</dd>
                 </div>
                 <div>
                     <dt>Precio</dt>

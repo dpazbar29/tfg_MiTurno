@@ -85,7 +85,7 @@ const cambiarEstado = (reserva, nuevoEstado) => {
                         class="reservations-table__row"
                     >
                         <td class="reservations-table__cell" data-label="Fecha y hora">
-                            {{ formatoFechaHora(reserva.fechahorainicio) }}
+                            {{ formatoFechaHora(reserva.fechahorainicio || reserva.fecha_hora_inicio) }}
                         </td>
 
                         <td class="reservations-table__cell" data-label="Cliente">
