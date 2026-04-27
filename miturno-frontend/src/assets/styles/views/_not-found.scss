@@ -1,0 +1,129 @@
+@use '../abstracts' as *;
+
+.not-found {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-8);
+  text-align: center;
+
+  &__container {
+    display: grid;
+    gap: var(--space-8);
+    max-width: var(--content-wide);
+    margin: 0 auto;
+  }
+
+  &__content {
+    display: grid;
+    gap: var(--space-6);
+    align-content: center;
+  }
+
+  &__main {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  &__code {
+    font-size: clamp(4rem, 12vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-primary);
+  }
+
+  &__title {
+    color: var(--color-text);
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  &__text {
+    max-width: 40ch;
+    margin: 0 auto;
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    line-height: 1.7;
+  }
+
+  &__path {
+    margin-top: var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  &__path code {
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-offset);
+    font-family: monospace;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 var(--space-6);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &--primary {
+      background-color: var(--color-primary);
+      color: var(--color-primary-button);
+      box-shadow: var(--shadow-sm);
+
+      &:hover {
+        background-color: var(--color-primary-hover);
+      }
+    }
+
+    &--secondary {
+      border-color: var(--color-border);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+
+      &:hover {
+        background-color: var(--color-surface-offset);
+      }
+    }
+  }
+  
+
+  @include respond-up(md) {
+    &__actions {
+      flex-direction: row;
+    }
+
+    &__links {
+      gap: var(--space-6);
+    }
+  }
+
+  @include respond-up(lg) {
+    padding: var(--space-12);
+  }
+}

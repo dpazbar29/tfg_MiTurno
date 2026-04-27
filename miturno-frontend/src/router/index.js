@@ -14,6 +14,7 @@ import ReservasViewAdmin from '../views/admin/ReservasView.vue'
 import ReservasViewEmpleado from '../views/empleado/EmpleadoReservasView.vue'
 import HorarioViewEmpleado from '../views/empleado/EmpleadoHorarioView.vue'
 import HomeView from '@/views/HomeView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const routes = [
     { path: '/', name: 'inicio', component: HomeView },
@@ -34,6 +35,8 @@ const routes = [
     { path: '/empleado', redirect: '/empleado/reservas', meta: { requiresAuth: true, roles: ['empleado'], }, },
     { path: '/empleado/reservas', name: 'empleado-reservas', component: ReservasViewEmpleado, meta: { requiresAuth: true, roles: ['empleado'], navLabel: 'Reservas empleado', navOrder: 2, showInNav: true, }, },
     { path: '/empleado/mi-horario', name: 'empleado-mi-horario', component: HorarioViewEmpleado, meta: { requiresAuth: true, roles: ['empleado'], navLabel: 'Horario empleado', navOrder: 3, showInNav: true, }, },
+
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView },
 ]
 
 const router = createRouter({
