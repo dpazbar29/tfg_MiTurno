@@ -13,9 +13,10 @@ import HorariosViewAdmin from '../views/admin/HorariosView.vue'
 import ReservasViewAdmin from '../views/admin/ReservasView.vue'
 import ReservasViewEmpleado from '../views/empleado/EmpleadoReservasView.vue'
 import HorarioViewEmpleado from '../views/empleado/EmpleadoHorarioView.vue'
+import HomeView from '@/views/HomeView.vue'
 
 const routes = [
-    { path: '/', redirect: '/dashboard', },
+    { path: '/', name: 'inicio', component: HomeView },
     
     { path: '/login', name: 'login', component: LoginView, meta: { guestOnly: true, }, },
     { path: '/register', name: 'register', component: RegisterView, meta: { guestOnly: true, }, },

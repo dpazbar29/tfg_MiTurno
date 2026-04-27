@@ -1,0 +1,368 @@
+@use '../abstracts' as *;
+
+.home {
+  padding-bottom: var(--space-16);
+
+  &__container {
+    width: min(100% - 2rem, 72rem);
+    margin: 0 auto;
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    margin-bottom: var(--space-3);
+    padding: 0 var(--space-3);
+    padding-top: var(--space-14);
+    background-color: var(--color-surface-offset);
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__title {
+    max-width: 12ch;
+    color: var(--color-text);
+    font-size: clamp(2.25rem, 5vw, 4.75rem);
+    font-weight: 800;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  &__subtitle {
+    max-width: 62ch;
+    margin-top: var(--space-4);
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  &__section-title {
+    max-width: 18ch;
+    color: var(--color-text);
+    font-size: clamp(1.75rem, 3vw, 2.75rem);
+    font-weight: 800;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  &__section-heading {
+    display: grid;
+    gap: var(--space-2);
+    margin-bottom: var(--space-8);
+  }
+
+  &__section {
+    padding: var(--space-12) 0;
+  }
+
+  &__hero {
+    padding: clamp(var(--space-10), 10vw, var(--space-20)) 0 var(--space-12);
+  }
+
+  &__hero-grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  &__hero-content {
+    display: grid;
+    align-content: start;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  &__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.875rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+    }
+
+    &--primary {
+      background-color: var(--color-primary);
+      color: var(--color-primary-button);
+      box-shadow: var(--shadow-sm);
+
+      &:hover {
+        background-color: var(--color-primary-hover);
+      }
+    }
+
+    &--secondary {
+      border-color: var(--color-border);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+
+      &:hover {
+        background-color: var(--color-surface-offset);
+      }
+    }
+  }
+
+  &__hero-card {
+    display: flex;
+    align-items: stretch;
+  }
+
+  &__hero-card-inner {
+    width: 100%;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background:
+      linear-gradient(
+        180deg,
+        var(--color-surface-2) 0%,
+        var(--color-surface) 100%
+      );
+    box-shadow: var(--shadow-md);
+  }
+
+  &__card-label {
+    margin-bottom: var(--space-3);
+    color: var(--color-primary);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  &__card-title {
+    max-width: 14ch;
+    color: var(--color-text);
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    font-weight: 800;
+    line-height: 1.15;
+  }
+
+  &__card-list {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding: 0;
+    list-style: none;
+
+    li {
+      position: relative;
+      padding-left: var(--space-5);
+      color: var(--color-text-muted);
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0.55rem;
+        left: 0;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+        background-color: var(--color-primary);
+      }
+    }
+  }
+
+  &__services,
+  &__benefits,
+  &__gallery {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  &__service-card,
+  &__benefit,
+  &__info-card {
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__service-title,
+  &__benefit-title,
+  &__info-title {
+    color: var(--color-text);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  &__service-text,
+  &__benefit-text,
+  &__info-text,
+  &__info-card p {
+    margin-top: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--text-base);
+    line-height: 1.7;
+  }
+
+  &__gallery-item {
+    position: relative;
+    overflow: hidden;
+    min-height: 14rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-surface-offset) 0%,
+        var(--color-surface) 100%
+      );
+    box-shadow: var(--shadow-sm);
+  }
+
+  &__gallery-image {
+    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  }
+
+  &__info-grid {
+    display: grid;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  &__info-block {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+  }
+
+  &__cta {
+    padding-top: var(--space-6);
+  }
+
+  &__cta-box {
+    display: grid;
+    gap: var(--space-6);
+    align-items: center;
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-md);
+  }
+
+  @include respond-up(sm) {
+    &__container {
+      width: min(100% - 2.5rem, 72rem);
+    }
+
+    &__services,
+    &__benefits {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__gallery {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @include respond-up(md) {
+    &__hero {
+      padding: clamp(var(--space-12), 9vw, var(--space-24)) 0 var(--space-16);
+    }
+
+    &__hero-grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(20rem, 0.8fr);
+      align-items: center;
+      gap: var(--space-10);
+    }
+
+    &__section {
+      padding: var(--space-16) 0;
+    }
+
+    &__services {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__benefits {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    &__gallery {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    &__gallery-item {
+      min-height: 16rem;
+
+      &:nth-child(1),
+      &:nth-child(4) {
+        min-height: 20rem;
+      }
+    }
+
+    &__info-grid {
+      grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+      align-items: center;
+    }
+
+    &__cta-box {
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: var(--space-8);
+    }
+  }
+
+  @include respond-up(lg) {
+    &__container {
+      width: min(100% - 4rem, 76rem);
+    }
+
+    &__hero-grid {
+      gap: var(--space-12);
+    }
+
+    &__section-heading {
+      margin-bottom: var(--space-10);
+    }
+
+    &__service-card,
+    &__benefit,
+    &__info-card {
+      padding: var(--space-6);
+    }
+
+    &__hero-card-inner {
+      padding: var(--space-8);
+    }
+
+    &__cta-box {
+      padding: var(--space-10);
+    }
+  }
+}
