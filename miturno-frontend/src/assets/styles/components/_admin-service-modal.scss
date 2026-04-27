@@ -1,0 +1,70 @@
+@use '../abstracts' as *;
+
+.admin-service-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background-color: var(--color-surface-overlay);
+
+  &__dialog {
+    width: min(100%, 40rem);
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-md);
+
+    @include respond-up(md) {
+      padding: var(--space-8);
+    }
+  }
+
+  &__header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__description {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__close {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border: 1px solid var(--color-interactive-secondary-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+
+    &:hover {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+  }
+}
