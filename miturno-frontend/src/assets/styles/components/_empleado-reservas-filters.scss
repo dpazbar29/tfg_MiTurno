@@ -1,0 +1,119 @@
+@use '../abstracts' as *;
+
+.empleado-reservas-filters {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-soft);
+
+  &__grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+
+  &__field {
+    display: grid;
+    gap: var(--space-2);
+
+    &--wide {
+      min-width: 0;
+    }
+  }
+
+  &__label {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__input {
+    @include input-base;
+
+    width: 100%;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-surface-hover);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &--secondary {
+      border-color: var(--color-interactive-secondary-border);
+      background-color: var(--color-interactive-secondary-bg);
+      color: var(--color-interactive-secondary-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-interactive-secondary-hover);
+      }
+    }
+  }
+
+  @include respond-up(md) {
+    &__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__field--wide {
+      grid-column: span 2;
+    }
+  }
+
+  @include respond-up(xl) {
+    &__grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    &__field--wide {
+      grid-column: span 2;
+    }
+  }
+}

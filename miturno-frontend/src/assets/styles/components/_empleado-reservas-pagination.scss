@@ -1,0 +1,61 @@
+@use '../abstracts' as *;
+
+.empleado-reservas-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+
+  &__button {
+    min-width: 8rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-surface-hover);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+  }
+
+  &__info {
+    width: 100%;
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+
+  @include respond-up(md) {
+    justify-content: space-between;
+
+    &__info {
+      width: auto;
+    }
+  }
+}

@@ -1,0 +1,31 @@
+@use '../abstracts' as *;
+
+.empleado-reservas-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  @include respond-up(xl) {
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+  }
+
+  &__heading {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.25rem);
+    line-height: 1.2;
+    color: var(--color-text);
+  }
+
+  &__intro {
+    margin: 0;
+    max-width: 75ch;
+    color: var(--color-text-muted);
+  }
+}

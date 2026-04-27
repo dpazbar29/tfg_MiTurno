@@ -1,0 +1,242 @@
+@use '../abstracts' as *;
+
+.empleado-reservas-table {
+  display: grid;
+  gap: var(--space-4);
+
+  &__scroll {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  &__table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  &__body {
+    display: grid;
+    gap: 0;
+  }
+
+  &__row {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__cell {
+    display: grid;
+    gap: var(--space-1);
+    padding: 0;
+    vertical-align: top;
+    color: var(--color-text);
+
+    &::before {
+      content: attr(data-label);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    &--datetime {
+      display: grid;
+      gap: var(--space-1);
+    }
+
+    &--actions {
+      min-width: 0;
+    }
+  }
+
+  &__date-main {
+    font-weight: 700;
+  }
+
+  &__date-secondary,
+  &__contact,
+  &__service,
+  &__person {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  &__date-secondary,
+  &__contact,
+  &__service {
+    color: var(--color-text-muted);
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: start;
+    min-height: 2rem;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  &__status[data-estado='pendiente'] {
+    background-color: var(--color-interactive-selected-bg);
+    color: var(--color-interactive-selected-text);
+    border-color: var(--color-interactive-selected-border);
+  }
+
+  &__status[data-estado='confirmada'] {
+    background-color: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
+    border-color: var(--color-status-success-border);
+  }
+
+  &__status[data-estado='cancelada'] {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border-color: var(--color-error);
+  }
+
+  &__status[data-estado='completada'] {
+    background-color: var(--color-interactive-selected-bg);
+    color: var(--color-interactive-selected-text);
+    border-color: var(--color-interactive-selected-border);
+  }
+
+  &__status[data-estado='ausencia'] {
+    background-color: var(--color-danger-hover);
+    color: var(--color-danger-text);
+    border-color: var(--color-danger-border);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    > * {
+      flex: 1 1 100%;
+      min-width: 100%;
+    }
+  }
+
+  &__action-btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-interactive-secondary-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-interactive-secondary-bg);
+    color: var(--color-interactive-secondary-text);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-interactive-secondary-hover);
+    }
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &--active {
+      border-color: var(--color-interactive-selected-border);
+      background-color: var(--color-interactive-selected-bg);
+      color: var(--color-interactive-selected-text);
+    }
+  }
+
+  @include respond-up(md) {
+    &__scroll {
+      overflow-x: auto;
+    }
+
+    &__table {
+      min-width: 74rem;
+    }
+
+    &__head {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      display: table-header-group;
+
+      th {
+        padding: var(--space-4);
+        text-align: left;
+        color: var(--color-text);
+        background-color: var(--color-surface-soft);
+        border-bottom: 1px solid var(--color-border);
+      }
+    }
+
+    &__body {
+      display: table-row-group;
+    }
+
+    &__row {
+      display: table-row;
+      padding: 0;
+    }
+
+    &__cell {
+      display: table-cell;
+      padding: var(--space-4);
+
+      &::before {
+        content: none;
+      }
+
+      &--actions {
+        min-width: 18rem;
+      }
+    }
+
+    &__actions {
+      > * {
+        flex: 1 1 12rem;
+        min-width: 12rem;
+      }
+    }
+  }
+}
