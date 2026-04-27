@@ -5,6 +5,11 @@ export const getHorarios = async () => {
     return data
 }
 
+export const getMiHorario = async () => {
+    const { data } = await api.get('/empleado/mi-horario')
+    return data
+}
+
 export const createHorario = async (payload) => {
     const { data } = await api.post('/horarios', payload)
     return data

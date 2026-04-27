@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Horario;
+use App\Models\Empleado;
 use Illuminate\Http\Request;
 
 class HorarioController extends Controller
@@ -128,5 +129,26 @@ class HorarioController extends Controller
         $horario->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function miHorario(Request $request)
+    {
+        $user = $request->user();
+
+        $empleado = Empleado::where('usuario_id', $user->id)->first();
+
+        if (!$empleado) {
+            return response()->json([
+                'message' => 'No existe un perfil de empleado asociado a este usuario.'
+            ], 404);
+        }
+
+        $horarios = Horario::query()
+            ->where('empleado_id', $empleado->id)
+            ->orderBy('dia_semana')
+            ->orderBy('hora_inicio')
+            ->get();
+
+        return response()->json($horarios);
     }
 }

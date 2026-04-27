@@ -58,4 +58,5 @@ Route::middleware(['auth:sanctum', 'rol:admin,empleado'])->group(function () {
 
     // RESERVAS EMPLEADO
     Route::get('empleado/mis-reservas', [ReservaController::class, 'indexEmpleado']);
+    Route::get('empleado/mi-horario', [HorarioController::class, 'miHorario']);
 });

@@ -11,7 +11,8 @@ import ServiciosViewAdmin from '../views/admin/ServiciosView.vue'
 import EmpleadosViewAdmin from '../views/admin/EmpleadosView.vue'
 import HorariosViewAdmin from '../views/admin/HorariosView.vue'
 import ReservasViewAdmin from '../views/admin/ReservasView.vue'
-import ReservasViewEmpleado from '../views/Empleado/EmpleadoReservasView.vue'
+import ReservasViewEmpleado from '../views/empleado/EmpleadoReservasView.vue'
+import HorarioViewEmpleado from '../views/empleado/EmpleadoHorarioView.vue'
 
 const routes = [
     { path: '/', redirect: '/dashboard', },
@@ -30,7 +31,8 @@ const routes = [
     { path: '/admin/reservas', name: 'admin-reservas', component: ReservasViewAdmin, meta: { requiresAuth: true, roles: ['admin'], navLabel: 'Reservas admin', navOrder: 5, showInNav: true, }, },
 
     { path: '/empleado', redirect: '/empleado/reservas', meta: { requiresAuth: true, roles: ['empleado'], }, },
-    { path: '/empleado/reservas', name: 'empleado-reservas', component: ReservasViewEmpleado, meta: { requiresAuth: true, roles: ['empleado'], navLabel: 'Reservas empleado', navOrder: 1, showInNav: true, }, },
+    { path: '/empleado/reservas', name: 'empleado-reservas', component: ReservasViewEmpleado, meta: { requiresAuth: true, roles: ['empleado'], navLabel: 'Reservas empleado', navOrder: 2, showInNav: true, }, },
+    { path: '/empleado/mi-horario', name: 'empleado-mi-horario', component: HorarioViewEmpleado, meta: { requiresAuth: true, roles: ['empleado'], navLabel: 'Horario empleado', navOrder: 3, showInNav: true, }, },
 ]
 
 const router = createRouter({
