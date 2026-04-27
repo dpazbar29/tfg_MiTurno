@@ -1,0 +1,231 @@
+@use '../abstracts' as *;
+
+.reservations-table {
+  display: grid;
+  gap: var(--space-4);
+
+  &__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+  }
+
+  &__table,
+  &__head,
+  &__body,
+  &__row,
+  &__cell {
+    display: block;
+  }
+
+  &__head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+
+    th {
+      padding: var(--space-4);
+      text-align: left;
+      font-size: 0.875rem;
+      color: var(--color-text);
+      background-color: var(--color-surface-soft);
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+
+  &__table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__row {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__cell {
+    display: grid;
+    gap: var(--space-1);
+    padding: 0;
+    vertical-align: top;
+    color: var(--color-text);
+
+    &::before {
+      content: attr(data-label);
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--color-text);
+    }
+
+    &--actions {
+      min-width: 0;
+    }
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  &__status[data-estado='pendiente'] {
+    background-color: var(--color-warning-highlight);
+    color: var(--color-warning);
+    border-color: var(--color-warning);
+  }
+
+  &__status[data-estado='confirmada'] {
+    background-color: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
+    border-color: var(--color-status-success-border);
+  }
+
+  &__status[data-estado='cancelada'] {
+    background-color: var(--color-error-bg);
+    color: var(--color-error);
+    border-color: var(--color-error);
+  }
+
+  &__status[data-estado='completada'] {
+    background-color: var(--color-primary-soft, var(--color-surface-soft));
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  &__status[data-estado='ausencia'] {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-text);
+    border-color: var(--color-danger-border);
+  }
+
+  &__actions {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  &__status-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    > * {
+      flex: 1 1 5rem;
+    }
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &--secondary {
+      border-color: var(--color-interactive-secondary-border);
+      background-color: var(--color-interactive-secondary-bg);
+      color: var(--color-interactive-secondary-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-interactive-secondary-hover);
+      }
+    }
+
+    &--ghost {
+      border-color: var(--color-border);
+      background-color: var(--color-surface);
+      color: var(--color-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-surface-hover);
+      }
+    }
+
+    &--danger {
+      border-color: var(--color-danger-border);
+      background-color: var(--color-danger-bg);
+      color: var(--color-danger-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-danger-hover);
+      }
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  @include respond-up(md) {
+    &__table {
+      display: table;
+      min-width: 72rem;
+    }
+
+    &__head {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      display: table-header-group;
+    }
+
+    &__body {
+      display: table-row-group;
+    }
+
+    &__row {
+      display: table-row;
+      padding: 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    &__cell {
+      display: table-cell;
+      padding: var(--space-4);
+
+      &::before {
+        content: none;
+      }
+
+      &--actions {
+        min-width: 20rem;
+      }
+    }
+  }
+}

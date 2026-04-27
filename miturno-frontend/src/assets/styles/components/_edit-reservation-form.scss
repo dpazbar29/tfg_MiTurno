@@ -1,0 +1,149 @@
+@use '../abstracts' as *;
+
+.edit-reservation-form {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+
+  &__field {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__label {
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &__readonly {
+    min-height: 2.75rem;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface-soft);
+    color: var(--color-text);
+  }
+
+  &__input,
+  &__textarea {
+    @include input-base;
+    width: 100%;
+    font: inherit;
+    background-color: var(--color-surface);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      background-color 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+
+  &__textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  &__input--error,
+  &__textarea--error {
+    border-color: var(--color-error);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 22%, transparent);
+    }
+  }
+
+  &__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-error);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+
+    > * {
+      width: 100%;
+    }
+  }
+
+  &__button {
+    min-height: 2.75rem;
+    padding: 0 var(--space-5);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+
+    &:focus-visible {
+      @include focus-ring;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    &--primary {
+      background-color: var(--color-primary);
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-primary-hover);
+      }
+    }
+
+    &--secondary {
+      border-color: var(--color-interactive-secondary-border);
+      background-color: var(--color-interactive-secondary-bg);
+      color: var(--color-interactive-secondary-text);
+
+      &:hover:not(:disabled) {
+        background-color: var(--color-interactive-secondary-hover);
+      }
+    }
+  }
+
+  @include respond-up(md) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: var(--space-5);
+
+    &__actions {
+      flex-direction: row;
+
+      > * {
+        width: auto;
+      }
+    }
+  }
+}
