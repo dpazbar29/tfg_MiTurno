@@ -13,32 +13,44 @@ class ServicioSeeder extends Seeder
      */
     public function run(): void
     {
-        Servicio::create([
-            'nombre' => 'Corte básico',
-            'descripcion' => 'Servicio básico de corte de pelo',
-            'duracion_minutos' => 30,
-            'precio' => 12.50,
-        ]);
+        Servicio::updateOrCreate(
+            ['nombre' => 'Corte básico'],
+            [
+                'descripcion' => 'Servicio básico de corte de pelo',
+                'duracion_minutos' => 30,
+                'precio' => 12.50,
+                'activo' => true,
+            ]
+        );
 
-        Servicio::create([
-            'nombre' => 'Corte y lavado',
-            'descripcion' => 'Corte de pelo y lavado final',
-            'duracion_minutos' => 30,
-            'precio' => 18.00,
-        ]);
+        Servicio::updateOrCreate(
+            ['nombre' => 'Corte y lavado'],
+            [
+                'descripcion' => 'Corte de pelo y lavado final',
+                'duracion_minutos' => 30,
+                'precio' => 18.00,
+                'activo' => true,
+            ]
+        );
 
-        Servicio::create([
-            'nombre' => 'Tinte',
-            'descripcion' => 'Aplicación de color',
-            'duracion_minutos' => 30,
-            'precio' => 30.00,
-        ]);
+        Servicio::updateOrCreate(
+            ['nombre' => 'Tinte'],
+            [
+                'descripcion' => 'Aplicación de color',
+                'duracion_minutos' => 30,
+                'precio' => 30.00,
+                'activo' => true,
+            ]
+        );
 
-        Servicio::create([
-            'nombre' => 'Tratamiento capilar',
-            'descripcion' => 'Tratamiento de hidratación y reparación',
-            'duracion_minutos' => 30,
-            'precio' => 20.00,
-        ]);
+        Servicio::updateOrCreate(
+            ['nombre' => 'Tratamiento capilar'],
+            [
+                'descripcion' => 'Tratamiento de hidratación y reparación',
+                'duracion_minutos' => 30,
+                'precio' => 20.00,
+                'activo' => true,
+            ]
+        );
     }
 }
