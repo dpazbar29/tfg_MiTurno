@@ -159,6 +159,19 @@ VITE_APP_NAME="${APP_NAME}"
 
 ```
 
+A continuación, se lanzará Apache y MySQL y en `http://localhost/phpmyadmin/` crearemos la base de datos con nombre `miturno_db`, usando preferiblemente el cotejamiento `utf8mb4_unicode_ci`
+
+Una vez creada, habrá que confirmar que en `php.ini` (Archivo de configuración de PHP) están activas las siguientes líneas:
+
+- extension=pdo_mysql
+- extension=mysqli
+
+Una vez comprobado, se ejecutarán las migraciones y ejecutaremos los seeders:
+```bash
+php artisan migrate
+php artisan db:seed --force
+```
+
 Finalmente se inicia el servidor:
 ```bash
 # Iniciar servidor
