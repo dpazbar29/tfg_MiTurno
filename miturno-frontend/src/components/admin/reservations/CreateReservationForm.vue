@@ -1,4 +1,8 @@
 <script setup>
+// Props recibidas desde el componente padre.
+// Este formulario no gestiona su estado completo internamente,
+// sino que actúa como componente controlado: recibe datos,
+// estados de carga, errores y opciones desde fuera.
 const props = defineProps({
     saving: {
         type: Boolean,
@@ -28,14 +32,21 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    
+    // Objeto principal del formulario de creación.
+    // El estado se mantiene en el padre y se pasa al hijo como prop.
     formularioCrear: {
         type: Object,
         required: true,
     },
+    
+    // Errores de validación o negocio asociados al formulario.
     erroresCrear: {
         type: Object,
         required: true,
     },
+
+    // Estado de búsqueda de cliente para autocompletado.
     clienteQuery: {
         type: String,
         default: '',
@@ -56,6 +67,8 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+
+    // Identificadores y estado activo para accesibilidad de la lista de cliente.
     clienteListboxId: {
         type: String,
         default: 'crear-cliente-listbox',
@@ -68,10 +81,14 @@ const props = defineProps({
         type: Number,
         default: -1,
     },
+
+    // Información derivada del servicio actualmente seleccionado.
     servicioSeleccionadoCrear: {
         type: Object,
         default: null,
     },
+
+    // Funciones auxiliares recibidas del padre para construir etiquetas y descripciones de opciones en listas de empleados/clientes.
     nombreEmpleadoOpcion: {
         type: Function,
         required: true,
@@ -86,6 +103,8 @@ const props = defineProps({
     },
 })
 
+// Eventos emitidos al componente padre.
+// El padre es quien decide cómo reaccionar: guardar, cancelar, consultar disponibilidad o gestionar la búsqueda de clientes.
 const emit = defineEmits([
     'submit',
     'cancel',
@@ -98,10 +117,15 @@ const emit = defineEmits([
     'update:cliente-query',
 ])
 
+// Envía la acción principal de guardado.
+// El componente hijo no realiza el guardado directamente, solo notifica al padre que debe procesarlo.
 const handleSubmit = () => {
     emit('submit')
 }
 
+// Gestiona la escritura en el campo de búsqueda de clientes.
+// 1. Emite el nuevo valor para actualizar el estado en el padre.
+// 2. Emite un segundo evento para disparar la lógica asociada a la búsqueda.
 const handleClienteInput = (event) => {
     emit('update:cliente-query', event.target.value)
     emit('client-input')

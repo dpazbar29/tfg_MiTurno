@@ -10,6 +10,8 @@ class ServicioController extends Controller
 {
     /**
      * Obtener todos los servicios.
+     *
+     * Devuelve el listado completo de servicios sin aplicar filtros.
      */
     public function index()
     {
@@ -17,7 +19,11 @@ class ServicioController extends Controller
     }
 
     /**
-     * Almacenar los nuevos servicios creados.
+     * Crear un nuevo servicio.
+     *
+     * Valida los datos recibidos.
+     * Crea el servicio en la base de datos.
+     * Devuelve el registro recién creado.
      */
     public function store(Request $request)
     {
@@ -29,13 +35,14 @@ class ServicioController extends Controller
             'activo' => 'boolean',
         ]);
 
+        // Crea el servicio con los datos validados.
         $servicio = Servicio::create($data);
 
         return response()->json($servicio, 201);
     }
 
     /**
-     * Mostrar servicio específico.
+     * Mostrar un servicio concreto.
      */
     public function show(Servicio $servicio)
     {
@@ -43,7 +50,9 @@ class ServicioController extends Controller
     }
 
     /**
-     * Actualizar uno de los servicios almacenados.
+     * Actualizar un servicio existente.
+     *
+     * Solo se validan y actualizan los campos enviados en la petición.
      */
     public function update(Request $request, Servicio $servicio)
     {
@@ -61,7 +70,7 @@ class ServicioController extends Controller
     }
 
     /**
-     * Eliminar un servicio específico.
+     * Eliminar un servicio concreto.
      */
     public function destroy(Servicio $servicio)
     {
@@ -70,11 +79,22 @@ class ServicioController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Obtener el catálogo de servicios activos.
+     *
+     * Este método está pensado para mostrar solo los servicios disponibles para los clientes en el frontend o en procesos de reserva.
+     */
     public function catalogo()
     {
         return Servicio::where('activo', true)->get();
     }
 
+    /**
+     * Obtener los empleados que pueden realizar un servicio concreto.
+     *
+     * Solo devuelve empleados cuyo usuario asociado esté activo.
+     * La respuesta se transforma para devolver únicamente el id y el nombre completo del empleado.
+     */
     public function empleados(Servicio $servicio)
     {
         $empleados = $servicio->empleados()

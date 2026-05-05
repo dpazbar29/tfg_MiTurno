@@ -1,6 +1,12 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref, watch, computed } from 'vue'
 
+// Props del componente:
+// - visible: controla la apertura/cierre del modal.
+// - empleado: empleado al que se le asignan servicios.
+// - servicios: catálogo completo de servicios disponibles.
+// - serviciosSeleccionados: ids de servicios actualmente asociados.
+// - saving: indica si el guardado está en curso.
 const props = defineProps({
     visible: {
         type: Boolean,
@@ -24,22 +30,33 @@ const props = defineProps({
     },
 })
 
+// Eventos emitidos al componente padre.
+// - close: cerrar el modal.
+// - update:serviciosSeleccionados: actualizar selección reactiva.
+// - save: persistir los cambios.
 const emit = defineEmits(['close', 'update:serviciosSeleccionados', 'save'])
 
+// Referencias usadas para accesibilidad y control del foco.
 const modalRef = ref(null)
 const modalTitleRef = ref(null)
 const lastTriggerRef = ref(null)
 
+// Lista derivada de servicios ya asignados al empleado.
+// Se calcula de forma reactiva filtrando el catálogo completo por los ids incluidos en serviciosSeleccionados.
 const serviciosAsignados = computed(() => {
     if (!props.empleado) return []
     return props.servicios.filter((s) => props.serviciosSeleccionados.includes(s.id))
 })
 
+// Lista derivada de servicios todavía disponibles para asignar.
+// Es el complementario de la lista anterior.
 const serviciosDisponibles = computed(() => {
     if (!props.empleado) return []
     return props.servicios.filter((s) => !props.serviciosSeleccionados.includes(s.id))
 })
 
+// Obtiene todos los elementos enfocables dentro del modal.
+// Se utiliza para implementar el "focus trap" y evitar que la navegación con teclado salga del diálogo.
 const getFocusableElements = () => {
     if (!modalRef.value) return []
     return modalRef.value.querySelectorAll(
@@ -47,6 +64,8 @@ const getFocusableElements = () => {
     )
 }
 
+// Gestiona el tabulador dentro del modal.
+// Si el usuario intenta avanzar más allá del último elemento, vuelve al primero. Si retrocede desde el primero, salta al último.
 const manejarTab = (event) => {
     if (!props.visible || event.key !== 'Tab') return
 
@@ -65,12 +84,21 @@ const manejarTab = (event) => {
     }
 }
 
+// Gestiona atajos de teclado del modal.
+// - Escape cierra el diálogo.
+// - Tab mantiene el foco dentro del modal.
 const manejarTeclado = (event) => {
     if (!props.visible) return
     if (event.key === 'Escape') emit('close')
     manejarTab(event)
 }
 
+// Observa la apertura/cierre del modal.
+// Cuando se abre:
+// - guarda qué elemento tenía el foco antes,
+// - espera al render,
+// - y mueve el foco al título.
+// Cuando se cierra, restaura el foco al elemento anterior.
 watch(
     () => props.visible,
     async (visible) => {
@@ -84,6 +112,7 @@ watch(
     },
 )
 
+// Registro global del listener de teclado al montar el componente y limpieza al destruirlo para evitar fugas de eventos.
 onMounted(() => document.addEventListener('keydown', manejarTeclado))
 onBeforeUnmount(() => document.removeEventListener('keydown', manejarTeclado))
 </script>

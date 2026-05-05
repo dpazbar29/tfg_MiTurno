@@ -15,6 +15,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
+// Datos base y estados de carga.
 const servicios = ref([])
 const empleados = ref([])
 const disponibilidad = ref([])
@@ -26,6 +27,8 @@ const loadingReserva = ref(false)
 const error = ref(null)
 const success = ref(null)
 
+// Formulario reactivo de nueva reserva.
+// servicio_id puede llegar preseleccionado por query param.
 const form = reactive({
     servicio_id: route.query.servicio_id ? Number(route.query.servicio_id) : '',
     empleado_id: '',
@@ -34,16 +37,19 @@ const form = reactive({
     notas: '',
 })
 
+// Errores locales para validación previa.
 const errores = reactive({
     servicio_id: '',
     fecha: '',
     hora: '',
 })
 
+// Servicio actualmente seleccionado.
 const servicioSeleccionado = computed(() => {
     return servicios.value.find((s) => s.id === Number(form.servicio_id)) || null
 })
 
+// Etiqueta legible para un empleado.
 const nombreEmpleado = (empleado) => {
     const usuario = empleado?.usuario
     if (usuario) {
@@ -53,12 +59,14 @@ const nombreEmpleado = (empleado) => {
     return empleado?.nombre || 'Profesional'
 }
 
+// Limpia slots disponibles y hora elegida.
 const limpiarDisponibilidad = () => {
     disponibilidad.value = []
     disponibilidadConsultada.value = false
     form.hora = ''
 }
 
+// Carga catálogo de servicios.
 const cargarServicios = async () => {
     loadingServicios.value = true
     error.value = null
@@ -74,6 +82,7 @@ const cargarServicios = async () => {
     }
 }
 
+// Carga empleados disponibles para un servicio.
 const cargarEmpleados = async (servicioId) => {
     if (!servicioId) {
         empleados.value = []
@@ -104,6 +113,7 @@ const cargarEmpleados = async (servicioId) => {
     }
 }
 
+// Si cambia el servicio, se invalida la disponibilidad anterior y se recargan los empleados relacionados.
 watch(
     () => form.servicio_id,
     async (newId, oldId) => {
@@ -114,6 +124,7 @@ watch(
   },
 )
 
+// Si cambia el empleado, la disponibilidad anterior deja de ser válida.
 watch(
     () => form.empleado_id,
     () => {
@@ -121,6 +132,7 @@ watch(
     },
 )
 
+// Si cambia la fecha, también se invalida la disponibilidad calculada.
 watch(
     () => form.fecha,
     () => {
@@ -128,12 +140,14 @@ watch(
     },
 )
 
+// Limpia errores del formulario local.
 const limpiarErroresFormulario = () => {
     errores.servicio_id = ''
     errores.fecha = ''
     errores.hora = ''
 }
 
+// Valida datos mínimos antes de consultar disponibilidad.
 const validarConsultaDisponibilidad = () => {
     limpiarErroresFormulario()
 
@@ -148,6 +162,7 @@ const validarConsultaDisponibilidad = () => {
     return !errores.servicio_id && !errores.fecha
 }
 
+// Valida además que haya una hora elegida antes de confirmar la reserva.
 const validarReserva = () => {
     const consultaValida = validarConsultaDisponibilidad()
 
@@ -158,6 +173,7 @@ const validarReserva = () => {
     return consultaValida && !errores.hora
 }
 
+// Normaliza distintos formatos posibles de respuesta del backend.
 const normalizarDisponibilidad = (data) => {
     if (Array.isArray(data)) return data
     if (Array.isArray(data?.slots_disponibles)) return data.slots_disponibles
@@ -166,6 +182,7 @@ const normalizarDisponibilidad = (data) => {
     return []
 }
 
+// Consulta slots disponibles en función del servicio, fecha y empleado opcional.
 const consultarDisponibilidad = async () => {
     error.value = null
     success.value = null
@@ -200,10 +217,12 @@ const consultarDisponibilidad = async () => {
     }
 }
 
+// Construye fecha y hora en el formato esperado por el backend.
 const construirFechaHoraInicio = () => {
     return `${form.fecha} ${form.hora}:00`
 }
 
+// Envía la reserva.
 const submit = async () => {
     error.value = null
     success.value = null
@@ -230,6 +249,7 @@ const submit = async () => {
 
         success.value = 'Reserva creada correctamente.'
 
+        // Tras una breve pausa para mostrar feedback, redirige al dashboard.
         setTimeout(() => {
             router.push('/dashboard')
         }, 1200)
@@ -248,6 +268,7 @@ const submit = async () => {
     }
 }
 
+// Carga inicial de servicios y, si procede, de empleados del servicio preseleccionado.
 onMounted(async () => {
     await cargarServicios()
 

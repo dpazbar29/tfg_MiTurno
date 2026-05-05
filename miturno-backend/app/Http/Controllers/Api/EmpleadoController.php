@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Hash;
 class EmpleadoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Devuelve el listado de empleados.
+     *
+     * Carga también las relaciones con el usuario asociado y los serviciospara evitar consultas adicionales.
      */
     public function index()
     {
@@ -20,7 +22,11 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo empleado junto con su usuario asociado.
+     *
+     * Primero valida los datos recibidos.
+     * Crea el registro en users.
+     * Crea el registro en empleados.
      */
     public function store(Request $request)
     {
@@ -36,7 +42,10 @@ class EmpleadoController extends Controller
             'fecha_nacimiento' => 'nullable|date|before:today',
         ]);
 
+        // Se usa transacción para evitar datos inconsistentes si falla una parte.
         $empleado = DB::transaction(function () use ($data) {
+
+            // Se crea el usuario con rol "empleado".
             $usuario = User::create([
                 'nombre' => $data['nombre'],
                 'apellidos' => $data['apellidos'],
@@ -47,6 +56,7 @@ class EmpleadoController extends Controller
                 'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
             ]);
 
+            // Se crea la entidad empleado vinculada al usuario creado.
             return Empleado::create([
                 'usuario_id' => $usuario->id,
                 'especialidades' => $data['especialidades'] ?? null,
@@ -55,6 +65,7 @@ class EmpleadoController extends Controller
             ]);
         });
 
+        // Devuelve el empleado con sus relaciones cargadas.
         return response()->json(
             $empleado->load(['usuario', 'servicios']),
             201
@@ -62,7 +73,7 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra un empleado concreto.
      */
     public function show(Empleado $empleado)
     {
@@ -70,7 +81,9 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza los datos de un empleado y los de su usuario.
+     *
+     * Permite modificar tanto la información del usuario asociado como los campos propios del empleado.
      */
     public function update(Request $request, Empleado $empleado)
     {
@@ -86,7 +99,10 @@ class EmpleadoController extends Controller
             'fecha_nacimiento' => 'nullable|date|before:today',
         ]);
 
+        // Se actualizan los datos dentro de una transacción para mantener coherencia.
         DB::transaction(function () use ($data, $empleado) {
+
+            // Si cambia algún dato del usuario asociado, se prepara un array con el valor nuevo o el actual.
             if (
                 array_key_exists('nombre', $data) ||
                 array_key_exists('apellidos', $data) ||
@@ -104,6 +120,7 @@ class EmpleadoController extends Controller
                     'fecha_nacimiento' => $data['fecha_nacimiento'] ?? null,
                 ];
 
+                // Si se manda contraseña, se cifra antes de guardarla.
                 if (!empty($data['password'])) {
                     $usuarioData['password'] = Hash::make($data['password']);
                 }
@@ -111,6 +128,7 @@ class EmpleadoController extends Controller
                 $empleado->usuario->update($usuarioData);
             }
 
+            // Se actualizan solo los campos propios de la tabla empleados.
             $empleado->update(collect($data)->only([
                 'especialidades',
                 'fecha_contratacion',
@@ -122,7 +140,10 @@ class EmpleadoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un empleado.
+     *
+     * Primero carga su usuario asociado y lo borra si existe.
+     * Después elimina el empleado si no hubiera usuario relacionado.
      */
     public function destroy(Empleado $empleado)
     {
@@ -137,6 +158,11 @@ class EmpleadoController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Sincroniza los servicios asociados a un empleado.
+     *
+     * Recibe una lista de IDs de servicios y actualiza la relación N:M entre empleados y servicios mediante sync().
+     */
     public function syncServicios(Request $request, Empleado $empleado)
     {
         $data = $request->validate([

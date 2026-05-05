@@ -23,28 +23,31 @@ class Empleado extends Model
         'activo' => 'boolean',
     ];
 
-    // Relación 1-1 con Usuario (el empleado es un usuario con rol de empleado)
+    // Un empleado es un Usuario (el empleado es un usuario con rol de empleado)
     public function usuario()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-    // Relación 1-N con Horarios
+    // Un empleado puede tener varios horarios
     public function horarios()
     {
         return $this->hasMany(Horario::class, 'empleado_id');
     }
 
+    // Un empleado puede tener varias reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'empleado_id');
     }
 
+    // Un empleado puede tener varias Notificaciones
     public function notificaciones()
     {
         return $this->hasMany(Notificacion::class, 'empleado_id');
     }
 
+    // Un empleado puede pertenecer a varios Servicios
     public function servicios()
     {
         return $this->belongsToMany(Servicio::class, 'empleado_servicio', 'empleado_id', 'servicio_id');

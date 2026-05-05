@@ -3,6 +3,11 @@ import { nextTick, onBeforeUnmount, onMounted, ref, watch, computed } from 'vue'
 import { useForm } from 'vee-validate'
 import * as yup from 'yup'
 
+// Props recibidas desde el componente padre.
+// - visible: controla si el modal se muestra o no.
+// - modo: define si el formulario crea o edita.
+// - empleado: datos del empleado cuando estamos en edición.
+// - saving: indica si el formulario se está guardando.
 const props = defineProps({
     visible: {
         type: Boolean,
@@ -22,12 +27,17 @@ const props = defineProps({
     },
 })
 
+// Eventos emitidos al componente padre.
+// - close: cerrar modal.
+// - submit: enviar datos del formulario.
 const emit = defineEmits(['close', 'submit'])
 
+// Referencias para accesibilidad y gestión del foco dentro del modal.
 const editModalRef = ref(null)
 const editModalTitleRef = ref(null)
 const lastTriggerRef = ref(null)
 
+// Esquema de validación del formulario
 const employeeSchema = yup.object({
     nombre: yup.string().trim().required('El nombre es obligatorio.'),
     apellidos: yup.string().trim().required('Los apellidos son obligatorios.'),
@@ -44,6 +54,9 @@ const employeeSchema = yup.object({
         'Introduce un teléfono válido.',
         (value) => !value || /^[0-9+\s()-]{6,20}$/.test(value),
         ),
+    // Validación condicional de contraseña:
+    // - En modo "crear" es obligatoria y debe tener al menos 8 caracteres.
+    // - En modo "editar" puede ir vacía; solo se valida si se rellena.
     password: yup
         .string()
         .transform((value) => value ?? '')
@@ -65,6 +78,8 @@ const employeeSchema = yup.object({
         }),
 })
 
+// Inicialización del formulario con vee-validate.
+// Se define el esquema de validación y los valores iniciales.
 const {
     defineField,
     handleSubmit,
@@ -86,6 +101,8 @@ const {
     },
 })
 
+// Cada defineField conecta un campo del formulario con vee-validate.
+// Devuelve el valor reactivo y los atributos necesarios del campo.
 const [nombre, nombreAttrs] = defineField('nombre')
 const [apellidos, apellidosAttrs] = defineField('apellidos')
 const [email, emailAttrs] = defineField('email')
@@ -96,18 +113,23 @@ const [fechaContratacion, fechaContratacionAttrs] = defineField('fecha_contratac
 const [activo, activoAttrs] = defineField('activo')
 const [fechaNacimiento, fechaNacimientoAttrs] = defineField('fecha_nacimiento')
 
+// Título dinámico del modal según el modo de uso.
 const titulo = computed(() =>
     props.modo === 'crear'
         ? 'Nuevo empleado'
         : `Editar perfil de ${props.empleado?.usuario?.nombre || ''} ${props.empleado?.usuario?.apellidos || ''}`.trim(),
 )
 
+// Descripción dinámica usada también como apoyo de accesibilidad.
 const descripcion = computed(() =>
     props.modo === 'crear'
         ? 'Completa los datos básicos para crear un nuevo empleado.'
         : 'Modifica los datos básicos del usuario y la información propia del empleado.',
 )
 
+// Carga los valores del formulario:
+// - Editando, precarga los datos del empleado.
+// - Creando, reinicia el formulario vacío.
 const cargarValores = () => {
     if (props.modo === 'editar' && props.empleado) {
         resetForm({
@@ -142,6 +164,13 @@ const cargarValores = () => {
     }
 }
 
+// Observa cambios en visibilidad, modo y empleado.
+// Cuando se abre el modal:
+// - guarda el elemento que tenía el foco,
+// - carga valores,
+// - espera a que el DOM se actualice,
+// - y mueve el foco al título del diálogo.
+// Cuando se cierra, devuelve el foco al elemento anterior.
 watch(
     () => [props.visible, props.modo, props.empleado],
     async ([visible]) => {
@@ -157,19 +186,24 @@ watch(
     { immediate: true },
 )
 
+// Envío del formulario validado.
+// handleSubmit solo ejecuta este bloque si el formulario es válido.
 const submit = handleSubmit(async (values) => {
     const payload = {
         ...values,
         rol: 'empleado',
     }
 
+    // En edición, si la contraseña está vacía, no se envía al backend para evitar sobrescribirla innecesariamente.
     if (props.modo === 'editar' && !payload.password) {
         delete payload.password
     }
 
+    // Se emite al padre el payload y la función setErrors, útil para mapear errores devueltos por la API al formulario.
     emit('submit', payload, setErrors)
 })
 
+// Recupera todos los elementos enfocables del modal.
 const getFocusableElements = () => {
     if (!editModalRef.value) return []
     return editModalRef.value.querySelectorAll(
@@ -177,6 +211,8 @@ const getFocusableElements = () => {
     )
 }
 
+// Control del tabulador dentro del modal.
+// Evita que el foco salga fuera del diálogo mientras está abierto, haciendo un ciclo entre el primer y el último elemento.
 const manejarTab = (event) => {
     if (!props.visible || event.key !== 'Tab') return
 
@@ -195,12 +231,16 @@ const manejarTab = (event) => {
     }
 }
 
+// Gestión global del teclado mientras el modal está abierto.
+// - Escape cierra el modal.
+// - Tab y Shift+Tab quedan atrapados dentro del diálogo.
 const manejarTeclado = (event) => {
     if (!props.visible) return
     if (event.key === 'Escape') emit('close')
     manejarTab(event)
 }
 
+// Registro y limpieza del listener global del teclado.
 onMounted(() => document.addEventListener('keydown', manejarTeclado))
 onBeforeUnmount(() => document.removeEventListener('keydown', manejarTeclado))
 </script>

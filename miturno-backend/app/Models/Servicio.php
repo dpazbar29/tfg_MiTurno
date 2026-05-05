@@ -24,11 +24,13 @@ class Servicio extends Model
         'precio' => 'decimal:2',
     ];
 
+    // Un servicio puede tener muchas reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'servicio_id');
     }
 
+    // Un servicio puede pertenecer a uno o varios empleados
     public function empleados()
     {
         return $this->belongsToMany(Empleado::class, 'empleado_servicio', 'servicio_id', 'empleado_id');

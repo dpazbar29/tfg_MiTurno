@@ -13,14 +13,17 @@ import CreateReservationForm from '@/components/admin/reservations/CreateReserva
 import EditReservationForm from '@/components/admin/reservations/EditReservationForm.vue'
 import StatusMessage from '@/components/feedback/StatusMessage.vue'
 
+// Datos base.
 const empleados = ref([])
 const servicios = ref([])
 const reservas = ref([])
 
+// Estados globales.
 const loading = ref(false)
 const saving = ref(false)
 const deletingReservaId = ref(null)
 
+// Filtros de búsqueda.
 const filtros = reactive({
     fecha: '',
     estado: '',
@@ -29,18 +32,22 @@ const filtros = reactive({
     busqueda: '',
 })
 
+// Control del modal de reservas.
 const mostrarModalReserva = ref(false)
 const reservaEditando = ref(null)
 const modoReserva = ref('crear')
 
+// Mensajes de feedback.
 const error = ref(null)
 const success = ref(null)
 
+// Disponibilidad para creación.
 const disponibilidad = ref([])
 const disponibilidadConsultada = ref(false)
 const loadingDisponibilidad = ref(false)
 const loadingEmpleadosDisponibilidad = ref(false)
 
+// Formulario para crear reserva.
 const formularioCrear = reactive({
     usuarioid: '',
     servicioid: '',
@@ -50,6 +57,7 @@ const formularioCrear = reactive({
     notas: '',
 })
 
+// Errores locales del formulario de creación.
 const erroresCrear = reactive({
     usuarioid: '',
     servicioid: '',
@@ -57,6 +65,7 @@ const erroresCrear = reactive({
     hora: '',
 })
 
+// Autocompletado de clientes.
 const clienteQuery = ref('')
 const clientesEncontrados = ref([])
 const clienteSeleccionado = ref(null)
@@ -65,6 +74,7 @@ const mostrarSugerenciasClientes = ref(false)
 const clienteActivoIndex = ref(-1)
 const clienteSearchTimeout = ref(null)
 
+// Estados posibles de una reserva.
 const estados = [
     { value: 'pendiente', label: 'Pendiente' },
     { value: 'confirmada', label: 'Confirmada' },
@@ -73,6 +83,7 @@ const estados = [
     { value: 'ausencia', label: 'Ausencia' },
 ]
 
+// Título y descripción del modal según el modo.
 const tituloModal = computed(() =>
     modoReserva.value === 'crear' ? 'Nueva reserva' : 'Editar reserva',
 )
@@ -83,14 +94,17 @@ const descripcionModal = computed(() =>
         : 'Edita una reserva existente.',
 )
 
+// Servicio actualmente seleccionado en la creación.
 const servicioSeleccionadoCrear = computed(() => {
     return servicios.value.find(
         (servicio) => Number(servicio.id) === Number(formularioCrear.servicioid),
     ) || null
 })
 
+// Identificador del listbox de clientes.
 const clienteListboxId = computed(() => 'crear-cliente-listbox')
 
+// Id de la opción activa para accesibilidad ARIA.
 const clienteActivoId = computed(() => {
     if (
         clienteActivoIndex.value < 0 ||
@@ -102,6 +116,7 @@ const clienteActivoId = computed(() => {
     return `crear-cliente-opcion-${clientesEncontrados.value[clienteActivoIndex.value].id}`
 })
 
+// Etiqueta visible de empleado en dropdowns/listas.
 const nombreEmpleadoOpcion = (empleado) => {
     const usuario = empleado?.usuario
 
@@ -112,16 +127,19 @@ const nombreEmpleadoOpcion = (empleado) => {
     return empleado?.nombre || 'Profesional'
 }
 
+// Nombre completo del cliente para mostrar en sugerencias.
 const nombreClienteOpcion = (cliente) => {
     const nombre = cliente?.nombre || ''
     const apellidos = cliente?.apellidos || ''
     return `${nombre} ${apellidos}`.trim()
 }
 
+// Línea secundaria para sugerencias de cliente.
 const descripcionClienteOpcion = (cliente) => {
     return cliente?.email || cliente?.telefono || `ID ${cliente?.id}`
 }
 
+// Carga de reservas con filtros dinámicos.
 const cargarReservas = async () => {
     loading.value = true
     error.value = null
@@ -166,10 +184,12 @@ const cargarReservas = async () => {
     }
 }
 
+// Refresca la lista usando los filtros actuales.
 const aplicarFiltros = () => {
     cargarReservas()
 }
 
+// Limpia filtros y recarga.
 const limpiarFiltros = () => {
     filtros.fecha = ''
     filtros.estado = ''
@@ -180,6 +200,7 @@ const limpiarFiltros = () => {
     cargarReservas()
 }
 
+// Limpia disponibilidad y hora al cambiar contexto.
 const limpiarDisponibilidadCrear = () => {
     disponibilidad.value = []
     disponibilidadConsultada.value = false
@@ -187,6 +208,7 @@ const limpiarDisponibilidadCrear = () => {
     erroresCrear.hora = ''
 }
 
+// Limpia errores locales del formulario de creación.
 const limpiarErroresCrear = () => {
     erroresCrear.usuarioid = ''
     erroresCrear.servicioid = ''
@@ -194,6 +216,7 @@ const limpiarErroresCrear = () => {
     erroresCrear.hora = ''
 }
 
+// Limpia cliente seleccionado y el estado de búsqueda.
 const limpiarClienteCrear = () => {
     formularioCrear.usuarioid = ''
     clienteQuery.value = ''
@@ -203,6 +226,7 @@ const limpiarClienteCrear = () => {
     clienteActivoIndex.value = -1
 }
 
+// Selecciona un cliente desde la lista de sugerencias.
 const seleccionarCliente = (cliente) => {
     formularioCrear.usuarioid = cliente.id
     clienteSeleccionado.value = cliente
@@ -213,6 +237,8 @@ const seleccionarCliente = (cliente) => {
     erroresCrear.usuarioid = ''
 }
 
+// Búsqueda remota con debounce.
+// Solo consulta a partir de 2 caracteres.
 const buscarClientesRemoto = async (query) => {
     const texto = String(query).trim()
 
@@ -240,6 +266,7 @@ const buscarClientesRemoto = async (query) => {
     }
 }
 
+// Maneja escritura en el input de cliente con debounce de 300ms.
 const manejarInputCliente = () => {
     formularioCrear.usuarioid = ''
     clienteSeleccionado.value = null
@@ -251,18 +278,21 @@ const manejarInputCliente = () => {
     }, 300)
 }
 
+// Muestra sugerencias si ya hay resultados.
 const manejarFocusCliente = () => {
     if (clientesEncontrados.value.length) {
         mostrarSugerenciasClientes.value = true
     }
 }
 
+// Oculta sugerencias con pequeña demora para permitir clic en opción.
 const manejarBlurCliente = () => {
     setTimeout(() => {
         mostrarSugerenciasClientes.value = false
     }, 150)
 }
 
+// Navegación por teclado del listado de clientes.
 const manejarTecladoCliente = (event) => {
     if (!mostrarSugerenciasClientes.value || !clientesEncontrados.value.length) {
         if (event.key === 'ArrowDown' && clientesEncontrados.value.length) {
@@ -294,6 +324,7 @@ const manejarTecladoCliente = (event) => {
     }
 }
 
+// Carga empleados disponibles para un servicio concreto.
 const cargarEmpleadosPorServicioAdmin = async (servicioId) => {
     if (!servicioId) {
         formularioCrear.empleadoid = ''
@@ -323,6 +354,7 @@ const cargarEmpleadosPorServicioAdmin = async (servicioId) => {
     }
 }
 
+// Si cambia el servicio en modo creación, resetea disponibilidad y recarga empleados.
 watch(
     () => formularioCrear.servicioid,
     async (newId, oldId) => {
@@ -335,6 +367,7 @@ watch(
     },
 )
 
+// Si cambia el empleado, invalida la disponibilidad calculada.
 watch(
     () => formularioCrear.empleadoid,
     () => {
@@ -343,6 +376,7 @@ watch(
     },
 )
 
+// Si cambia la fecha, invalida la disponibilidad calculada.
 watch(
     () => formularioCrear.fecha,
     () => {
@@ -351,6 +385,7 @@ watch(
     },
 )
 
+// Valida los campos mínimos antes de consultar disponibilidad.
 const validarConsultaDisponibilidadCrear = () => {
     limpiarErroresCrear()
 
@@ -373,6 +408,7 @@ const validarConsultaDisponibilidadCrear = () => {
     )
 }
 
+// Requiere además una hora seleccionada.
 const validarReservaCrear = () => {
     const consultaValida = validarConsultaDisponibilidadCrear()
 
@@ -383,6 +419,7 @@ const validarReservaCrear = () => {
     return consultaValida && !erroresCrear.hora
 }
 
+// Normaliza varias estructuras posibles de respuesta del backend.
 const normalizarDisponibilidad = (data) => {
     if (Array.isArray(data)) return data
     if (Array.isArray(data?.slots_disponibles)) return data.slots_disponibles
@@ -392,6 +429,7 @@ const normalizarDisponibilidad = (data) => {
     return []
 }
 
+// Consulta disponibilidad para crear una reserva.
 const consultarDisponibilidadCrear = async () => {
     error.value = null
     success.value = null
@@ -433,10 +471,13 @@ const consultarDisponibilidadCrear = async () => {
     }
 }
 
+// Construye el timestamp de inicio para una nueva reserva.
 const construirFechaHoraInicioCrear = () => {
     return `${formularioCrear.fecha} ${formularioCrear.hora}:00`
 }
 
+// Abre el modal para crear una reserva.
+// También limpia formularios y consulta/cliente previa.
 const abrirModalCrear = async () => {
     error.value = null
     success.value = null
@@ -461,6 +502,7 @@ const abrirModalCrear = async () => {
     }
 }
 
+// Abre el modal en modo edición.
 const abrirModalEdicion = async (reserva) => {
     error.value = null
     success.value = null
@@ -469,6 +511,7 @@ const abrirModalEdicion = async (reserva) => {
     mostrarModalReserva.value = true
 }
 
+// Cierra el modal y resetea el estado de creación.
 const cerrarModal = () => {
     mostrarModalReserva.value = false
     reservaEditando.value = null
@@ -487,6 +530,7 @@ const cerrarModal = () => {
     formularioCrear.notas = ''
 }
 
+// Guarda una edición de reserva.
 const guardarReservaEditar = async (values, setErrors) => {
     saving.value = true
     error.value = null
@@ -532,6 +576,7 @@ const guardarReservaEditar = async (values, setErrors) => {
     }
 }
 
+// Guarda una nueva reserva.
 const guardarReservaCrear = async () => {
     error.value = null
     success.value = null
@@ -576,6 +621,7 @@ const guardarReservaCrear = async () => {
     }
 }
 
+// Elimina una reserva tras confirmación.
 const eliminarReservaConfirmado = async (reserva) => {
     if (!window.confirm('¿Seguro que quieres eliminar esta reserva?')) return
 
@@ -595,6 +641,7 @@ const eliminarReservaConfirmado = async (reserva) => {
     }
 }
 
+// Cambia el estado de una reserva con confirmación.
 const cambiarEstadoReserva = async (reserva, nuevoEstado) => {
     if (!window.confirm(`¿Confirmas cambiar el estado a ${nuevoEstado}?`)) return
 
@@ -608,10 +655,12 @@ const cambiarEstadoReserva = async (reserva, nuevoEstado) => {
     }
 }
 
+// Carga inicial.
 onMounted(() => {
     cargarReservas()
 })
 
+// Limpieza del debounce al salir de la vista.
 onBeforeUnmount(() => {
     clearTimeout(clienteSearchTimeout.value)
 })

@@ -24,7 +24,7 @@ class Horario extends Model
         'activo' => 'boolean',
     ];
 
-    // Relación con empleados
+    // Un horario pertenece a un empleado
     public function empleado()
     {
         return $this->belongsTo(Empleado::class, 'empleado_id');

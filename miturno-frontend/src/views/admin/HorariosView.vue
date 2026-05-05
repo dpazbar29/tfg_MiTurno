@@ -8,22 +8,28 @@ import ScheduleWeekGrid from '../../components/admin/schedule/ScheduleWeekGrid.v
 import ScheduleModal from '../../components/admin/schedule/ScheduleModal.vue'
 import StatusMessage from '../../components/feedback/StatusMessage.vue'
 
+// Estado principal de la vista.
 const empleados = ref([])
 const horarios = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const deletingHorarioId = ref(null)
 
+// Estado de filtro y modal.
 const empleadoSeleccionadoId = ref('')
 const mostrarModalHorario = ref(false)
 const horarioEditando = ref(null)
 const modoHorario = ref('crear')
 
+// Mensajes globales.
 const error = ref(null)
 const success = ref(null)
 
+// Referencia al elemento que abrió el modal.
+// Se usa para devolverle el foco al cerrar.
 const lastTriggerRef = ref(null)
 
+// Definición estática de los días de la semana para construir la cuadrícula.
 const diasSemana = [
     { value: 0, label: 'Domingo' },
     { value: 1, label: 'Lunes' },
@@ -34,14 +40,20 @@ const diasSemana = [
     { value: 6, label: 'Sábado' },
 ]
 
+// Lista derivada de empleados activos.
+// Excluye empleados desactivados o usuarios asociados inactivos.
 const empleadosActivos = computed(() =>
     empleados.value.filter((empleado) => empleado.activo && empleado.usuario?.activo !== false),
 )
 
+// Devuelve el objeto completo del empleado actualmente seleccionado en el filtro.
 const empleadoSeleccionado = computed(() =>
     empleados.value.find((empleado) => String(empleado.id) === String(empleadoSeleccionadoId.value)),
 )
 
+// Filtra los horarios por empleado seleccionado y los ordena:
+// 1. por día de la semana,
+// 2. y dentro del día, por hora de inicio.
 const horariosFiltrados = computed(() => {
     if (!empleadoSeleccionadoId.value) return []
     return horarios.value
@@ -52,6 +64,7 @@ const horariosFiltrados = computed(() => {
         })
 })
 
+// Agrupa los horarios filtrados por día de la semana.
 const horariosPorDia = computed(() =>
     diasSemana.map((dia) => ({
         ...dia,
@@ -59,10 +72,12 @@ const horariosPorDia = computed(() =>
     })),
 )
 
+// Título dinámico del modal según si se crea o se edita una franja.
 const tituloModal = computed(() =>
     modoHorario.value === 'crear' ? 'Nueva franja horaria' : 'Editar franja horaria',
 )
 
+// Carga inicial de empleados y horarios en paralelo.
 const cargarDatos = async () => {
     loading.value = true
     error.value = null
@@ -90,6 +105,8 @@ const cargarDatos = async () => {
     }
 }
 
+// Abre el modal en modo creación.
+// Guarda también el elemento que disparó la acción para restaurar foco después.
 const abrirModalCrear = async (event = null, dia = null) => {
     lastTriggerRef.value = event?.currentTarget || document.activeElement
     error.value = null
@@ -99,6 +116,7 @@ const abrirModalCrear = async (event = null, dia = null) => {
     mostrarModalHorario.value = true
 }
 
+// Abre el modal en modo edición con la franja seleccionada.
 const abrirModalEdicion = async (horario, event = null) => {
     lastTriggerRef.value = event?.currentTarget || document.activeElement
     error.value = null
@@ -108,6 +126,7 @@ const abrirModalEdicion = async (horario, event = null) => {
     mostrarModalHorario.value = true
 }
 
+// Cierra el modal y devuelve el foco al elemento que lo abrió.
 const cerrarModal = () => {
     mostrarModalHorario.value = false
     horarioEditando.value = null
@@ -118,6 +137,8 @@ const cerrarModal = () => {
     }
 }
 
+// Guarda una franja nueva o actualiza una existente.
+// Convierte ciertos campos a Number para evitar inconsistencias de tipo al enviar datos al backend.
 const guardarHorario = async (payload, setErrors) => {
     saving.value = true
     error.value = null
@@ -145,6 +166,7 @@ const guardarHorario = async (payload, setErrors) => {
 
         const backendErrors = err.response?.data?.errors
 
+        // Si el backend devuelve errores por campo, se mapean al formulario.
         if (backendErrors && setErrors) {
             setErrors({
                 empleado_id: backendErrors.empleado_id?.[0],
@@ -165,6 +187,7 @@ const guardarHorario = async (payload, setErrors) => {
     }
 }
 
+// Elimina una franja horaria tras confirmación.
 const eliminarHorarioConfirmado = async (horario) => {
     if (!window.confirm('¿Seguro que quieres eliminar esta franja horaria?')) return
 
@@ -184,6 +207,7 @@ const eliminarHorarioConfirmado = async (horario) => {
     }
 }
 
+// Carga inicial al montar la vista.
 onMounted(cargarDatos)
 </script>
 

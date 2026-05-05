@@ -14,7 +14,10 @@ use Illuminate\Http\Request;
 class ReservaController extends Controller
 {
     /**
-     * Listado para cliente: solo sus reservas.
+     * Listado de reservas para cliente.
+     *
+     * Devuelve únicamente las reservas del usuario autenticado.
+     * Ordenadas por fecha de inicio y paginadas.
      */
     public function indexCliente(Request $request)
     {
@@ -33,7 +36,10 @@ class ReservaController extends Controller
     }
 
     /**
-     * Listado para administrador: todas las reservas con filtros.
+     * Listado de reservas para administrador.
+     *
+     * Permite consultar todas las reservas
+     * Aplicar filtros por fecha, estado, empleado, usuario, servicio o búsqueda libre.
      */
     public function indexAdmin(Request $request)
     {
@@ -44,28 +50,33 @@ class ReservaController extends Controller
             ])
             ->orderBy('fecha_hora_inicio', 'desc');
 
-        // Filtros opcionales
+        // Filtro por fecha concreta.
         if ($request->filled('fecha')) {
             $fecha = Carbon::parse($request->fecha);
             $query->whereDate('fecha_hora_inicio', $fecha->toDateString());
         }
 
+        // Filtro por estado de la reserva.
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
         }
 
+        // Filtro por empleado.
         if ($request->filled('empleado_id')) {
             $query->where('empleado_id', $request->empleado_id);
         }
 
+        // Filtro por usuario.
         if ($request->filled('usuario_id')) {
             $query->where('usuario_id', $request->usuario_id);
         }
 
+        // Filtro por servicio.
         if ($request->filled('servicio_id')) {
             $query->where('servicio_id', $request->servicio_id);
         }
 
+        // Búsqueda por nombre, apellidos, email del usuario o por nombre del servicio.
         if ($request->filled('busqueda')) {
             $query->where(function ($q) use ($request) {
                 $q->whereHas('usuario', function ($userQuery) use ($request) {
@@ -84,6 +95,12 @@ class ReservaController extends Controller
         return response()->json($reservas);
     }
 
+    /**
+     * Listado de reservas para empleado.
+     *
+     * Devuelve solo las reservas asignadas al empleado del usuario autenticado.
+     * También acepta filtros por fecha, estado y búsqueda.
+     */
     public function indexEmpleado(Request $request)
     {
         $user = $request->user()->load('empleado');
@@ -133,24 +150,15 @@ class ReservaController extends Controller
     }
 
     /**
-     * Almacenar las nuevas reservas creadas.
-     * 
-     * Flujo de trabajo:
-     * 1. Valida los datos básicos recibidos desde la petición.
-     * 2. Obtiene el servicio para conocer su duración en minutos.
-     * 3. Calcula la hora de fin de la reserva a partir de la fecha_hora_inicio.
-     * 4. Comprueba que el empleado tenga un horario activo y normal que cubra por completo el tramo horario.
-     * 5. Busca reservas activas del mismo empleado en ese mismo día y verifica que no exista solapamiento.
-     * 6. Si todo es correcto, crea la reserva con estado por defecto 'pendiente' cuando no se indique otro.
-     * 
-     * Reglas de negocio aplicadas:
-     * - La reserva debe estar dentro del horario del empleado.
-     * - No puede solaparse con otra reserva pendiente o confirmada.
-     * - La duración real de la cita se toma del servicio seleccionado.
-     * 
-     * Respuestas:
-     * - 201: reserva creada correctamente.
-     * - 422: horario inválido o conflicto con otra reserva.
+     * Crear una nueva reserva.
+     *
+     * Flujo:
+     * 1. Valida los datos básicos.
+     * 2. Obtiene el servicio para conocer su duración.
+     * 3. Calcula la hora de finalización.
+     * 4. Comprueba si el empleado tiene horario activo para ese tramo.
+     * 5. Verifica que no haya solapamiento con otras reservas activas.
+     * 6. Crea la reserva con estado pendiente por defecto si no se envía.
      */
     public function store(Request $request)
     {
@@ -170,6 +178,7 @@ class ReservaController extends Controller
 
         $diaSemana = $inicio->dayOfWeek;
 
+        // Comprueba que el empleado tenga un horario normal activo que cubra toda la cita.
         $horarioValido = Horario::where('empleado_id', $data['empleado_id'])
             ->where('dia_semana', $diaSemana)
             ->where('activo', true)
@@ -184,6 +193,7 @@ class ReservaController extends Controller
             ], 422);
         }
 
+        // Comprueba si existe otra reserva activa que se solape con la nueva.
         $solapa = Reserva::where('empleado_id', $data['empleado_id'])
             ->whereDate('fecha_hora_inicio', $inicio->toDateString())
             ->whereIn('estado', ['pendiente', 'confirmada'])
@@ -208,7 +218,7 @@ class ReservaController extends Controller
     }
 
     /**
-     * Mostrar reserva específica.
+     * Mostrar una reserva concreta.
      */
     public function show(Reserva $reserva)
     {
@@ -216,104 +226,89 @@ class ReservaController extends Controller
     }
 
     /**
-     * Actualiza una de las reservas guardadas.
-     * 
-     * Flujo de trabajo:
-     * 1. Valida solo los campos enviados en la petición.
-     * 2. Obtiene los valores finales que tendrá la reserva.
-     * 3. Recupera el servicio final para calcular su duración.
-     * 4. Comprueba que el nuevo tramo horario encaje en el horario del empleado para ese día.
-     * 5. Busca posibles solapamientos con otras reservas del mismo empleado, excluyendo la reserva editada.
-     * 6. Si no hay conflicto, actualiza la reserva.
-     * 
-     * Reglas de negocio aplicadas:
-     * - Una edición no puede sacar la reserva fuera del horario del empleado.
-     * - Una edición no puede generar solapamientos con otras reservas activas.
-     * - La propia reserva actual se excluye de la comprobación de conflicto.
-     * 
-     * Respuestas:
-     * - 200: reserva actualizada correctamente.
-     * - 422: horario inválido o conflicto con otra reserva.
+     * Actualizar una reserva existente.
+     *
+     * Repite las comprobaciones de horario y solapamiento si cambian el empleado, la fecha o el servicio.
      */
     public function update(Request $request, Reserva $reserva)
-{
-    $data = $request->validate([
-        'usuario_id' => 'sometimes|exists:users,id',
-        'empleado_id' => 'sometimes|nullable|exists:empleados,id',
-        'servicio_id' => 'sometimes|exists:servicios,id',
-        'fecha_hora_inicio' => 'sometimes|date',
-        'estado' => 'sometimes|in:pendiente,confirmada,cancelada,completada,ausencia',
-        'notas' => 'sometimes|nullable|string',
-    ]);
+    {
+        $data = $request->validate([
+            'usuario_id' => 'sometimes|exists:users,id',
+            'empleado_id' => 'sometimes|nullable|exists:empleados,id',
+            'servicio_id' => 'sometimes|exists:servicios,id',
+            'fecha_hora_inicio' => 'sometimes|date',
+            'estado' => 'sometimes|in:pendiente,confirmada,cancelada,completada,ausencia',
+            'notas' => 'sometimes|nullable|string',
+        ]);
 
-    $nuevoEmpleadoId = array_key_exists('empleado_id', $data)
-        ? $data['empleado_id']
-        : $reserva->empleado_id;
+        $nuevoEmpleadoId = array_key_exists('empleado_id', $data)
+            ? $data['empleado_id']
+            : $reserva->empleado_id;
 
-    $nuevoServicioId = $data['servicio_id'] ?? $reserva->servicio_id;
-    $nuevaFechaInicio = $data['fecha_hora_inicio'] ?? $reserva->fecha_hora_inicio;
+        $nuevoServicioId = $data['servicio_id'] ?? $reserva->servicio_id;
+        $nuevaFechaInicio = $data['fecha_hora_inicio'] ?? $reserva->fecha_hora_inicio;
 
-    $servicio = Servicio::findOrFail($nuevoServicioId);
+        $servicio = Servicio::findOrFail($nuevoServicioId);
 
-    $inicio = Carbon::parse($nuevaFechaInicio);
-    $fin = $inicio->copy()->addMinutes($servicio->duracion_minutos);
-    $diaSemana = $inicio->dayOfWeek;
+        $inicio = Carbon::parse($nuevaFechaInicio);
+        $fin = $inicio->copy()->addMinutes($servicio->duracion_minutos);
+        $diaSemana = $inicio->dayOfWeek;
 
-    if ($nuevoEmpleadoId !== null) {
-        $horarioValido = Horario::where('empleado_id', $nuevoEmpleadoId)
-            ->where('dia_semana', $diaSemana)
-            ->where('activo', true)
-            ->where('tipo', 'normal')
-            ->where('hora_inicio', '<=', $inicio->format('H:i:s'))
-            ->where('hora_fin', '>=', $fin->format('H:i:s'))
-            ->exists();
+        if ($nuevoEmpleadoId !== null) {
+            $horarioValido = Horario::where('empleado_id', $nuevoEmpleadoId)
+                ->where('dia_semana', $diaSemana)
+                ->where('activo', true)
+                ->where('tipo', 'normal')
+                ->where('hora_inicio', '<=', $inicio->format('H:i:s'))
+                ->where('hora_fin', '>=', $fin->format('H:i:s'))
+                ->exists();
 
-        if (! $horarioValido) {
-            return response()->json([
-                'message' => 'La reserva está fuera del horario del empleado.',
-                'errors' => [
-                    'fecha_hora_inicio' => ['La reserva está fuera del horario del empleado.'],
-                    'empleado_id' => ['El empleado no tiene disponibilidad para ese tramo horario.'],
-                ],
-            ], 422);
-        }
-
-        $reservasMismoDia = Reserva::with('servicio')
-            ->where('empleado_id', $nuevoEmpleadoId)
-            ->whereDate('fecha_hora_inicio', $inicio->toDateString())
-            ->whereIn('estado', ['pendiente', 'confirmada'])
-            ->where('id', '!=', $reserva->id)
-            ->get();
-
-        $solapa = $reservasMismoDia->contains(function ($otraReserva) use ($inicio, $fin) {
-            if (! $otraReserva->servicio) {
-                return false;
+            if (! $horarioValido) {
+                return response()->json([
+                    'message' => 'La reserva está fuera del horario del empleado.',
+                    'errors' => [
+                        'fecha_hora_inicio' => ['La reserva está fuera del horario del empleado.'],
+                        'empleado_id' => ['El empleado no tiene disponibilidad para ese tramo horario.'],
+                    ],
+                ], 422);
             }
 
-            $inicioExistente = Carbon::parse($otraReserva->fecha_hora_inicio);
-            $finExistente = $inicioExistente->copy()->addMinutes($otraReserva->servicio->duracion_minutos);
+            $reservasMismoDia = Reserva::with('servicio')
+                ->where('empleado_id', $nuevoEmpleadoId)
+                ->whereDate('fecha_hora_inicio', $inicio->toDateString())
+                ->whereIn('estado', ['pendiente', 'confirmada'])
+                ->where('id', '!=', $reserva->id)
+                ->get();
 
-            return $inicio < $finExistente && $fin > $inicioExistente;
-        });
+            $solapa = $reservasMismoDia->contains(function ($otraReserva) use ($inicio, $fin) {
+                if (! $otraReserva->servicio) {
+                    return false;
+                }
 
-        if ($solapa) {
-            return response()->json([
-                'message' => 'El empleado ya tiene una reserva en ese tramo horario.',
-                'errors' => [
-                    'fecha_hora_inicio' => ['El empleado ya tiene una reserva en ese tramo horario.'],
-                    'empleado_id' => ['El empleado ya tiene una reserva en ese tramo horario.'],
-                ],
-            ], 422);
+                $inicioExistente = Carbon::parse($otraReserva->fecha_hora_inicio);
+                $finExistente = $inicioExistente->copy()->addMinutes($otraReserva->servicio->duracion_minutos);
+
+                return $inicio < $finExistente && $fin > $inicioExistente;
+            });
+
+            if ($solapa) {
+                return response()->json([
+                    'message' => 'El empleado ya tiene una reserva en ese tramo horario.',
+                    'errors' => [
+                        'fecha_hora_inicio' => ['El empleado ya tiene una reserva en ese tramo horario.'],
+                        'empleado_id' => ['El empleado ya tiene una reserva en ese tramo horario.'],
+                    ],
+                ], 422);
+            }
         }
+
+        $reserva->update($data);
+
+        return $reserva->load(['usuario', 'empleado.usuario', 'servicio']);
     }
 
-    $reserva->update($data);
-
-    return $reserva->load(['usuario', 'empleado.usuario', 'servicio']);
-}
-
     /**
-     * Eliminar una reserva específica.
+     * Eliminar una reserva concreta.
      */
     public function destroy(Reserva $reserva)
     {
@@ -322,6 +317,11 @@ class ReservaController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Consultar disponibilidad de un empleado para una fecha y servicio concretos.
+     *
+     * Recorre los horarios activos del día, genera huecos de 30 minutos y descarta los tramos ocupados por reservas activas.
+     */
     public function disponibilidad(Request $request)
     {
         $data = $request->validate([
@@ -396,6 +396,11 @@ class ReservaController extends Controller
         ]);
     }
 
+    /**
+     * Cancelar una reserva.
+     *
+     * Solo permite cancelar la reserva al usuario propietario de la misma.
+     */
     public function cancelar(Request $request, Reserva $reserva)
     {
         $user = $request->user();

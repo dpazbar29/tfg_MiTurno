@@ -1,6 +1,10 @@
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
+// Props del modal:
+// - visible: controla la apertura/cierre.
+// - titulo: texto principal del diálogo.
+// - descripcion: texto secundario explicativo.
 const props = defineProps({
     visible: {
         type: Boolean,
@@ -16,12 +20,18 @@ const props = defineProps({
     },
 })
 
+// Evento emitido al padre para cerrar el modal.
 const emit = defineEmits(['close'])
 
+// Referencias para:
+// - el contenedor del modal,
+// - el título, al que se moverá el foco al abrir,
+// - el elemento que tenía el foco antes de abrir el modal.
 const modalRef = ref(null)
 const modalTitleRef = ref(null)
 const lastTriggerRef = ref(null)
 
+// Cierra el modal y, después de actualizar el DOM, devuelve el foco al elemento que lo abrió.
 const cerrarModal = () => {
     emit('close')
 
@@ -32,6 +42,8 @@ const cerrarModal = () => {
     })
 }
 
+// Obtiene los elementos enfocable dentro del contenedor del modal.
+// Se usa para construir el ciclo de focus trap.
 const getFocusableElements = (container) => {
     if (!container) return []
 
@@ -40,6 +52,8 @@ const getFocusableElements = (container) => {
     )
 }
 
+// Mantiene el foco dentro del modal cuando se navega con Tab o Shift+Tab.
+// Si el foco está en el primer elemento y se pulsa Shift+Tab, salta al último. Si está en el último y se pulsa Tab, vuelve al primero.
 const manejarTabEnContenedor = (event, container) => {
     const focusableElements = [...getFocusableElements(container)]
     if (!focusableElements.length) return
@@ -56,6 +70,9 @@ const manejarTabEnContenedor = (event, container) => {
     }
 }
 
+// Gestión global del teclado mientras el modal está abierto.
+// - Escape cierra el modal.
+// - Tab queda atrapado dentro del diálogo.
 const manejarTecladoModal = (event) => {
     if (!props.visible) return
 
@@ -69,6 +86,14 @@ const manejarTecladoModal = (event) => {
     }
 }
 
+// Observa el estado visible del modal.
+// Al abrirlo:
+// - guarda el elemento con foco previo,
+// - espera a que el DOM pinte,
+// - enfoca el título,
+// - y registra el listener de teclado.
+// Al cerrarlo:
+// - elimina el listener para no dejar eventos activos.
 watch(
     () => props.visible,
     async (visible) => {
@@ -83,6 +108,7 @@ watch(
     },
 )
 
+// Limpieza final por seguridad al destruir el componente.
 onBeforeUnmount(() => {
     document.removeEventListener('keydown', manejarTecladoModal)
 })

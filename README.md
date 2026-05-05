@@ -199,6 +199,21 @@ npm run dev
 ```
 El servidor estará disponible en `http://localhost:5173/`
 
+### 4.Credenciales de los usuarios creados con los seeders
+#### ADMIN
+- Correo: adminmiturno@gmail.com
+- Contraseña: adminmiturno01
+
+#### EMPLEADOS
+- Empleado Número Uno
+   - Correo: empleadouno@gmail.com
+   - Contraseña: empleadouno01
+
+- Empleado Número Dos
+   - Correo: empleadodos@gmail.com
+   - Contraseña: empleadodos01
+
+
 ## Estructura del proyecto
 ```
 tfg_MiTurno/

@@ -44,6 +44,10 @@ const router = createRouter({
     routes,
 })
 
+// 1. Si hay token pero no hay usuario cargado, intenta recuperar el perfil.
+// 2. Si la ruta requiere auth y no hay sesión, redirige al login.
+// 3. Si la ruta es solo para invitados, redirige al dashboard.
+// 4. Si la ruta exige roles concretos, valida el rol actual.
 router.beforeEach(async (to) => {
     const auth = useAuthStore()
 

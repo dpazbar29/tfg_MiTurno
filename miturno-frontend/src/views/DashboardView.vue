@@ -12,15 +12,19 @@ import DashboardInfoList from '@/components/dashboard/DashboardInfoList.vue'
 const auth = useAuthStore()
 const router = useRouter()
 
+// Estados de proceso y feedback.
 const saving = ref(false)
 const deleting = ref(false)
 const error = ref('')
 const success = ref('')
 const mostrarModal = ref(false)
 
+// Referencias para control de foco en el modal.
 const modalPanel = ref(null)
 const lastActiveElement = ref(null)
 
+// Esquema de validación del perfil.
+// Convierte campos vacíos en null cuando procede y exige confirmación si se cambia la contraseña.
 const profileSchema = yup.object({
     nombre: yup
         .string()
@@ -63,6 +67,7 @@ const profileSchema = yup.object({
     }),
 })
 
+// useForm centraliza validación, errores y reseteo del perfil.
 const {
     errors,
     defineField,
@@ -82,6 +87,7 @@ const {
     },
 })
 
+// Vinculación de campos del formulario.
 const [nombre, nombreAttrs] = defineField('nombre')
 const [apellidos, apellidosAttrs] = defineField('apellidos')
 const [email, emailAttrs] = defineField('email')
@@ -90,6 +96,7 @@ const [fecha_nacimiento, fechaNacimientoAttrs] = defineField('fecha_nacimiento')
 const [password, passwordAttrs] = defineField('password')
 const [password_confirmation, passwordConfirmationAttrs] = defineField('password_confirmation')
 
+// Carga los valores actuales del usuario en el formulario.
 const inicializarFormulario = (user) => {
     resetForm({
         values: {
@@ -104,6 +111,7 @@ const inicializarFormulario = (user) => {
     })
 }
 
+// Cuando cambia auth.user, el formulario se sincroniza automáticamente.
 watch(
     () => auth.user,
     (user) => {
@@ -112,11 +120,13 @@ watch(
     { immediate: true },
 )
 
+// Nombre completo para la cabecera.
 const nombreCompleto = computed(() => {
     if (!auth.user) return ''
     return `${auth.user.nombre || ''} ${auth.user.apellidos || ''}`.trim()
 })
 
+// Formatea fecha de nacimiento a dd-mm-aaaa.
 const formatearFechaNacimiento = (fecha) => {
     if (!fecha) return 'No indicada'
 
@@ -131,11 +141,13 @@ const formatearFechaNacimiento = (fecha) => {
 const badgeRol = computed(() => auth.user?.rol || '')
 const puedeEliminarCuenta = computed(() => auth.isCliente)
 
+// Limpia mensajes globales.
 const limpiarMensajes = () => {
     error.value = ''
     success.value = ''
 }
 
+// Obtiene elementos enfocables dentro del modal.
 const getFocusableElements = (container) => {
     if (!container) return []
     return [
@@ -145,6 +157,7 @@ const getFocusableElements = (container) => {
     ]
 }
 
+// Enfoca el primer elemento del modal tras renderizarlo.
 const enfocarPrimerElementoModal = async () => {
     await nextTick()
 
@@ -156,6 +169,7 @@ const enfocarPrimerElementoModal = async () => {
     }
 }
 
+// Abre el modal de edición guardando el foco previo.
 const abrirModalEdicion = async () => {
     limpiarMensajes()
     inicializarFormulario(auth.user)
@@ -164,6 +178,7 @@ const abrirModalEdicion = async () => {
     await enfocarPrimerElementoModal()
 }
 
+// Cierra el modal y devuelve el foco al elemento que lo abrió.
 const cerrarModalEdicion = async () => {
     mostrarModal.value = false
     inicializarFormulario(auth.user)
@@ -171,6 +186,7 @@ const cerrarModalEdicion = async () => {
     lastActiveElement.value?.focus?.()
 }
 
+// Envía el formulario validado al backend.
 const guardarPerfil = handleSubmit(async (values) => {
     limpiarMensajes()
     saving.value = true
@@ -219,11 +235,13 @@ const guardarPerfil = handleSubmit(async (values) => {
     }
 })
 
+// Cierra sesión y redirige al login.
 const logout = async () => {
     await auth.logout()
     router.push('/login')
 }
 
+// Elimina la cuenta si el usuario tiene permiso.
 const eliminarCuenta = async () => {
     if (!puedeEliminarCuenta.value) return
 
@@ -248,6 +266,7 @@ const eliminarCuenta = async () => {
     }
 }
 
+// Atajos de teclado del modal: Escape cierra y Tab mantiene foco atrapado.
 const manejarTecladoModal = (event) => {
     if (!mostrarModal.value || !modalPanel.value) return
 
@@ -282,6 +301,7 @@ onBeforeUnmount(() => {
     document.removeEventListener('keydown', manejarTecladoModal)
 })
 
+// Saca las iniciales del usuario.
 const inicialesUsuario = computed(() => {
     if (!auth.user) return ''
     return `${auth.user.nombre?.charAt(0) || ''}${auth.user.apellidos?.charAt(0) || ''}`.toUpperCase()

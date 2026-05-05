@@ -12,6 +12,8 @@ class UsuarioController extends Controller
 {
     /**
      * Obtener todos los usuarios.
+     *
+     * Devuelve el listado completo de usuarios registrados en el sistema.
      */
     public function index()
     {
@@ -19,7 +21,11 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Almacenar los nuevos usuarios creados.
+     * Crear un nuevo usuario.
+     *
+     * Valida los datos recibidos.
+     * Cifra la contraseña.
+     * Guarda el nuevo usuario en la base de datos.
      */
     public function store(Request $request)
     {
@@ -34,6 +40,7 @@ class UsuarioController extends Controller
             'activo' => 'boolean',
         ]);
 
+        // Se cifra la contraseña antes de almacenar el usuario.
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
@@ -42,7 +49,7 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Mostrar usuario específico.
+     * Mostrar un usuario concreto.
      */
     public function show(User $user)
     {
@@ -50,7 +57,10 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Actualizar uno de los usuarios almacenados.
+     * Actualizar un usuario existente.
+     *
+     * Solo valida y actualiza los campos enviados.
+     * Si se envía una nueva contraseña, también se cifra.
      */
     public function update(Request $request, User $user)
     {
@@ -65,6 +75,7 @@ class UsuarioController extends Controller
             'activo' => 'sometimes|boolean',
         ]);
 
+        // Si se actualiza la contraseña, se guarda cifrada.
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
@@ -75,7 +86,7 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Eliminar un usuario específico.
+     * Eliminar un usuario concreto.
      */
     public function destroy(User $user)
     {
@@ -84,9 +95,17 @@ class UsuarioController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Buscar clientes activos por texto libre.
+     *
+     * Permite buscar por nombre, apellidos, nombre completo, email o teléfono.
+     * Solo devuelve usuarios con rol cliente y estado activo.
+     */
     public function buscarClientes(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
+
+        // Se exige al menos 2 caracteres para evitar búsquedas demasiado amplias.
         if (mb_strlen($q) < 2) {
             return response()->json([]);
         }

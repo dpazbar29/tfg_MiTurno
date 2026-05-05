@@ -8,14 +8,18 @@ import EmpleadoReservasTable from '../../components/empleado/EmpleadoReservasTab
 import EmpleadoReservasPagination from '../../components/empleado/EmpleadoReservasPagination.vue'
 import StatusMessage from '@/components/feedback/StatusMessage.vue'
 
+// Estado principal de la vista.
 const reservas = ref([])
 const meta = ref(null)
 const loading = ref(false)
 const updatingEstadoId = ref(null)
 
+// Mensajes globales.
 const error = ref(null)
 const success = ref(null)
 
+// Filtros activos del listado.
+// Incluyen además la página actual para mantener la navegación.
 const filtros = ref({
     fecha: '',
     estado: '',
@@ -23,6 +27,7 @@ const filtros = ref({
     page: 1,
 })
 
+// Opciones visibles para filtrar por estado.
 const estados = [
     { value: '', label: 'Todos' },
     { value: 'pendiente', label: 'Pendiente' },
@@ -32,6 +37,7 @@ const estados = [
     { value: 'ausencia', label: 'Ausencia' },
 ]
 
+// Estados que el empleado puede aplicar como acción directa sobre una cita.
 const estadosAccion = [
     { value: 'confirmada', label: 'Confirmar' },
     { value: 'completada', label: 'Completar' },
@@ -39,8 +45,11 @@ const estadosAccion = [
     { value: 'cancelada', label: 'Cancelar' },
 ]
 
+// Indica si hay datos para mostrar.
 const hayReservas = computed(() => reservas.value.length > 0)
 
+// Objeto derivado de paginación normalizado.
+// Sirve para no depender directamente de la forma exacta de meta en la plantilla.
 const pagination = computed(() => {
     if (!meta.value) return null
 
@@ -54,6 +63,7 @@ const pagination = computed(() => {
     }
 })
 
+// Carga las reservas del empleado según filtros y página.
 const cargarReservas = async (page = 1) => {
     loading.value = true
     error.value = null
@@ -64,6 +74,7 @@ const cargarReservas = async (page = 1) => {
             page,
         })
 
+        // Se espera una respuesta paginada con data + metadatos.
         reservas.value = response?.data ?? []
         meta.value = {
             current_page: response?.current_page ?? 1,
@@ -85,11 +96,13 @@ const cargarReservas = async (page = 1) => {
     }
 }
 
+// Aplica filtros reiniciando a la primera página.
 const aplicarFiltros = () => {
     success.value = null
     cargarReservas(1)
 }
 
+// Limpia todos los filtros y vuelve a la página 1.
 const limpiarFiltros = () => {
     filtros.value = {
         fecha: '',
@@ -102,12 +115,14 @@ const limpiarFiltros = () => {
     cargarReservas(1)
 }
 
+// Cambia de página si el valor solicitado está dentro del rango válido.
 const cambiarPagina = (page) => {
     if (!pagination.value) return
     if (page < 1 || page > pagination.value.last_page) return
     cargarReservas(page)
 }
 
+// Actualiza el estado de una reserva con confirmación previa.
 const cambiarEstadoReserva = async (reserva, nuevoEstado) => {
     if (!reserva?.id) return
 
@@ -124,6 +139,8 @@ const cambiarEstadoReserva = async (reserva, nuevoEstado) => {
     try {
         await updateReserva(reserva.id, { estado: nuevoEstado })
         success.value = `La cita se ha actualizado a ${nuevoEstado}.`
+
+        // Se recarga manteniendo la página actual.
         await cargarReservas(filtros.value.page || 1)
     } catch (err) {
         console.error(err.response?.data || err)
@@ -133,6 +150,7 @@ const cambiarEstadoReserva = async (reserva, nuevoEstado) => {
     }
 }
 
+// Carga inicial al montar la vista.
 onMounted(() => {
     cargarReservas()
 })

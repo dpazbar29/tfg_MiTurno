@@ -24,6 +24,8 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    // Reserva actualmente seleccionada para edición.
+    // Cuando cambia, el formulario debe resincronizar sus valores.
     reservaEditando: {
         type: Object,
         default: null,
@@ -32,17 +34,22 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel'])
 
+// Esquema de validación para edición.
+// Se valida solo la estructura del formulario
 const edicionSchema = yup.object({
     empleadoid: yup
         .number()
         .nullable()
         .transform((value, originalValue) => {
+        // Convierte string vacío o null en null real.
+        // Esto evita que Yup intente validar '' como número.
         return originalValue === '' || originalValue === null ? null : value
         })
         .test(
         'empleado-valido',
         'El empleado debe existir.',
         function (value) {
+            // Permite null y valida que, si existe valor, sea interpretable como número.
             return value === null || !Number.isNaN(Number(value))
         },
         ),
@@ -63,6 +70,8 @@ const edicionSchema = yup.object({
         .max(500, 'Las notas no pueden exceder 500 caracteres.'),
 })
 
+// Inicialización del formulario con vee-validate.
+// Se definen esquema, valores iniciales y utilidades para manejar errores, reseteos y envío validado.
 const {
     defineField,
     handleSubmit,
@@ -80,12 +89,14 @@ const {
     },
 })
 
+// Vinculación de cada campo del formulario con vee-validate.
 const [empleadoId, empleadoIdAttrs] = defineField('empleadoid')
 const [servicioId, servicioIdAttrs] = defineField('servicioid')
 const [fechaHoraInicio, fechaHoraInicioAttrs] = defineField('fechahorainicio')
 const [estado, estadoAttrs] = defineField('estado')
 const [notas, notasAttrs] = defineField('notas')
 
+// Convierte una fecha cualquiera al formato esperado por <input type="datetime-local">
 const formatoDatetimeLocal = (valor) => {
     if (!valor) return ''
 
@@ -101,6 +112,8 @@ const formatoDatetimeLocal = (valor) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
+// Resetea y recarga el formulario con los datos de la reserva activa.
+// Esto no solo actualiza valores, sino que también limpia errores previos.
 const resetearFormulario = () => {
     const reserva = props.reservaEditando
 
@@ -116,6 +129,8 @@ const resetearFormulario = () => {
     })
 }
 
+// Cuando el modal se abre, se cargan de nuevo los datos de la reserva.
+// Esto evita que queden residuos de una edición anterior si el componente se reutiliza varias veces sin destruirse.
 watch(
     () => props.visible,
     (visible) => {
@@ -125,6 +140,7 @@ watch(
     },
 )
 
+// Si cambia la reserva a editar mientras el modal sigue visible, el formulario también se resincroniza automáticamente.
 watch(
     () => props.reservaEditando,
     () => {
@@ -134,6 +150,8 @@ watch(
     },
 )
 
+// Envío validado del formulario.
+// Si el esquema pasa la validación, se emiten los valores al padre junto con setErrors para poder reflejar errores devueltos por la API.
 const submit = handleSubmit((values) => {
     emit('submit', values, setErrors)
 })

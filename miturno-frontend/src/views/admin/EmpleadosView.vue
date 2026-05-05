@@ -8,23 +8,28 @@ import EmployeeServicesModal from '../../components/admin/employees/EmployeeServ
 import EmployeeProfileModal from '../../components/admin/employees/EmployeeProfileModal.vue'
 import StatusMessage from '../../components/feedback/StatusMessage.vue'
 
+// Estado principal de la vista.
 const empleados = ref([])
 const servicios = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const deletingEmployeeId = ref(null)
 
+// Estado de edición/visualización de modales.
 const empleadoEditando = ref(null)
 const empleadoPerfilEditando = ref(null)
 const mostrarModalPerfil = ref(false)
 const mostrarModalServicios = ref(false)
 const modoPerfil = ref('crear')
 
+// Servicios seleccionados para el modal de asignación.
 const serviciosSeleccionados = ref([])
 
 const error = ref(null)
 const success = ref(null)
 
+// Carga inicial de empleados y servicios.
+// Se usa Promise.all para resolver ambas peticiones en paralelo
 const cargarDatos = async () => {
     loading.value = true
     error.value = null
@@ -45,6 +50,8 @@ const cargarDatos = async () => {
     }
 }
 
+// Abre el modal de servicios cargando antes el detalle completo del empleado.
+// Esto asegura que la asignación se haga con datos actualizados.
 const abrirModalServicios = async (empleado) => {
     error.value = null
     success.value = null
@@ -59,12 +66,14 @@ const abrirModalServicios = async (empleado) => {
     }
 }
 
+// Limpia el estado del modal de servicios al cerrarlo.
 const cerrarModalServicios = () => {
     mostrarModalServicios.value = false
     empleadoEditando.value = null
     serviciosSeleccionados.value = []
 }
 
+// Prepara el modal de perfil en modo creación.
 const abrirModalCrear = () => {
     error.value = null
     success.value = null
@@ -73,6 +82,7 @@ const abrirModalCrear = () => {
     mostrarModalPerfil.value = true
 }
 
+// Prepara el modal de perfil en modo edición cargando el detalle del empleado.
 const abrirModalEdicion = async (empleado) => {
     error.value = null
     success.value = null
@@ -87,12 +97,14 @@ const abrirModalEdicion = async (empleado) => {
     }
 }
 
+// Limpia el estado del modal de perfil.
 const cerrarModalPerfil = () => {
     mostrarModalPerfil.value = false
     empleadoPerfilEditando.value = null
     modoPerfil.value = 'crear'
 }
 
+// Guarda la relación entre empleado y servicios seleccionados.
 const guardarServicios = async () => {
     if (!empleadoEditando.value) return
 
@@ -117,6 +129,9 @@ const guardarServicios = async () => {
     }
 }
 
+// Guarda el perfil del empleado.
+// En modo crear llama a createEmpleado; en modo editar, a updateEmpleado.
+// Si el backend devuelve errores de validación, se mapean a vee-validate
 const guardarPerfil = async (payload, setErrors) => {
     saving.value = true
     error.value = null
@@ -161,6 +176,7 @@ const guardarPerfil = async (payload, setErrors) => {
     }
 }
 
+// Elimina un empleado tras confirmación del usuario.
 const eliminarEmpleadoConfirmado = async (empleado) => {
     const nombreCompleto = `${empleado.usuario?.nombre || ''} ${empleado.usuario?.apellidos || ''}`.trim()
 
@@ -184,6 +200,7 @@ const eliminarEmpleadoConfirmado = async (empleado) => {
 
 const empleadosDisponibles = computed(() => empleados.value || [])
 
+// Carga inicial al montar la vista.
 onMounted(cargarDatos)
 </script>
 

@@ -1,4 +1,7 @@
 <script setup>
+// Props recibidas desde el componente padre.
+// - empleado: datos del empleado cuando estamos en edición.
+// - deletingEmployeeId: eliminando Id del empleado.
 defineProps({
     empleado: {
         type: Object,
@@ -10,6 +13,10 @@ defineProps({
     },
 })
 
+// Eventos emitidos al componente padre.
+// - edit-services: editar servicios.
+// - edit-profile: editar perfil
+// - delete: eliminar datos.
 defineEmits(['edit-services', 'edit-profile', 'delete'])
 </script>
 

@@ -45,17 +45,19 @@ class User extends Authenticatable
         });
     }
 
-    // Relación 1-1 inversa: usuario -> empleado (solo si rol=empleado)
+    // Un usuario es un Empleado (si el rol es empleado)
     public function empleado()
     {
         return $this->hasOne(Empleado::class, 'usuario_id');
     }
 
+    // Un usuario puede tener varias reservas
     public function reservas()
     {
         return $this->hasMany(Reserva::class, 'usuario_id');
     }
 
+    // Un usuario puede tener varias notificaciones
     public function notificaciones()
     {
         return $this->hasMany(Notificacion::class, 'usuario_id');

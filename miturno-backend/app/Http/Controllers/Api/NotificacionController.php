@@ -10,6 +10,8 @@ class NotificacionController extends Controller
 {
     /**
      * Obtener todas las notificaciones.
+     *
+     * Se cargan las relaciones asociadas para mostrar la información completa de la reserva, el usuario y el empleado implicados.
      */
     public function index()
     {
@@ -17,7 +19,10 @@ class NotificacionController extends Controller
     }
 
     /**
-     * Almacenar las nuevas notificaciones creadas.
+     * Crear una nueva notificación.
+     *
+     * Valida los datos recibidos y guarda la notificación en la base de datos.
+     * Después devuelve la notificación con parte de sus relaciones cargadas.
      */
     public function store(Request $request)
     {
@@ -29,13 +34,14 @@ class NotificacionController extends Controller
             'enviado' => 'boolean',
         ]);
 
+        // Crea la notificación con los datos validados.
         $notificacion = Notificacion::create($data);
 
         return response()->json($notificacion->load(['reserva.usuario', 'reserva.servicio']), 201);
     }
 
     /**
-     * Mostrar notificación específica.
+     * Mostrar una notificación concreta.
      */
     public function show(Notificacion $notificacion)
     {
@@ -43,7 +49,9 @@ class NotificacionController extends Controller
     }
 
     /**
-     * Actualizar una de las notificaciones almacenadas.
+     * Actualizar una notificación existente.
+     *
+     * Permite modificar cualquiera de sus campos principales si se envían en la petición.
      */
     public function update(Request $request, Notificacion $notificacion)
     {
@@ -61,7 +69,7 @@ class NotificacionController extends Controller
     }
 
     /**
-     * Elimina una notificación específica.
+     * Eliminar una notificación concreta.
      */
     public function destroy(Notificacion $notificacion)
     {
